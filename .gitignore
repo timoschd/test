@@ -1,0 +1,13 @@
+secrets/
+.Rproj.user
+.RDataTmp
+.RData
+.Rhistory
+*.csv
+*secret*
+*.json
+*cache*
+*.xlsx
+*.RDS
+*.parquet
+*cache*/
