@@ -11,3 +11,4 @@ secrets/
 *.RDS
 *.parquet
 *cache*/
+*.bak
