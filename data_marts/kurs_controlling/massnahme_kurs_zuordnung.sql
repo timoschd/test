@@ -1,5 +1,5 @@
 -- create table with kurses added to corresponding massnahmen
-CREATE TABLE kc.massnhame_kurs_zuordnung AS
+CREATE TABLE kc.massnahme_kurs_zuordnung AS
 WITH temptable AS (
          SELECT massnahmen_organisation_courses.app_item_id,
             massnahmen_organisation_courses.app_item_id_formatted AS massnahmen_id_qm,
@@ -33,23 +33,23 @@ SELECT temptable_2.app_item_id,
    WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse);
    
 -- Set indices
-ALTER TABLE kc.massnhame_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
-CREATE INDEX ON kc.massnhame_kurs_zuordnung (massnahmen_id_sales);
-CREATE INDEX ON kc.massnhame_kurs_zuordnung (massnahmen_id_qm);
-CREATE INDEX ON kc.massnhame_kurs_zuordnung (kurs_id);
+ALTER TABLE kc.massnahme_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
+CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_sales);
+CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_qm);
+CREATE INDEX ON kc.massnahme_kurs_zuordnung (kurs_id);
 
 
 -- Set forgein constraints
-ALTER TABLE kc.massnhame_kurs_zuordnung
+ALTER TABLE kc.massnahme_kurs_zuordnung
 ADD CONSTRAINT fk_massnahme
 FOREIGN KEY (massnahmen_id_sales)
 REFERENCES kc.massnahmen (massnahmen_id_sales);
 
-ALTER TABLE kc.massnhame_kurs_zuordnung
+ALTER TABLE kc.massnahme_kurs_zuordnung
 ADD CONSTRAINT fk_kurs
 FOREIGN KEY (kurs_id)
 REFERENCES kc.kurse (kurs_id);
 
 -- Set table owner
-ALTER TABLE kc.massnhame_kurs_zuordnung OWNER TO read_only;
+ALTER TABLE kc.massnahme_kurs_zuordnung OWNER TO read_only;
 
