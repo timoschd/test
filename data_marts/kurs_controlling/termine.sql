@@ -1,6 +1,6 @@
 
 -- Create Table termine
-Create TABLE kc. kc.termine AS
+Create TABLE kc.termine AS
 SELECT qs_terminmanagement.app_item_id,
     qs_terminmanagement.tutoriengruppen_id::numeric AS termin_id,
     qs_terminmanagement.terminart::json ->> 'text'::text AS termin_terminart,
@@ -17,7 +17,9 @@ FROM podio.qs_terminmanagement;
 -- Add indices and primary keys
 ALTER TABLE kc.termine ADD COLUMN id SERIAL PRIMARY KEY;
 
-CREATE UNIQUE INDEX ON kc. kc.termine (termin_id);
+CREATE INDEX ON kc.termine (termin_id);
+CREATE INDEX ON kc.termine (kurs_id_qm);
+CREATE INDEX ON kc.termine (dozent_id_qm);
 
 -- Set forgein constraints
 ALTER TABLE kc.termine

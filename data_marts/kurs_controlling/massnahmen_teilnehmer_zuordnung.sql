@@ -28,7 +28,7 @@
             temptable_2.teilnehmer_zeiteinsatz,
             temptable_2.massnahmen_titel,
             temptable_2.massnahmen_id_sales,
-            temptable_2.massnahmen_ber_gemassnahmen_gebuhr_nach_bgsbuhr,
+            temptable_2.massnahmen_gebuhr_nach_bgs,
             temptable_2.massnahmen_dauer_in_wochen,
             temptable_2.massnahmen_reihenfolge,
             sum(temptable_2.massnahmen_dauer_in_wochen) OVER (PARTITION BY temptable_2.lead_id ORDER BY temptable_2.massnahmen_reihenfolge) AS massnahmen_dauer_in_wochen_cumsum
@@ -44,11 +44,15 @@
 			temptable_3.massnahmen_reihenfolge,
 			temptable_3.massnahmen_dauer_in_wochen_cumsum,
 			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum
-		   FROM temptable_3;
+		   FROM temptable_3
+		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen);
 		
 -- Set indices & PRIMARY KEY
 ALTER TABLE kc.massnahmen_teilnehmer_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
+
 CREATE INDEX ON kc.massnahmen_teilnehmer_zuordnung (lead_id);
+
+CREATE INDEX ON kc.massnahmen_teilnehmer_zuordnung (massnahmen_id_sales);
 
 -- Set FOREIGN KEY
 ALTER TABLE kc.massnahmen_teilnehmer_zuordnung
