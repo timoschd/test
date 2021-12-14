@@ -1,5 +1,5 @@
 -- create teilnehmer table in data mart. use all participants that paticipated in 2019 or later
-CREATE TABLE lehrgangs_controlling.teilnehmer AS 
+CREATE TABLE kc.teilnehmer AS 
 SELECT 
 app_item_id as lead_id,
 kategorien::json ->> 'text' as abrechnungs_kategorie,
@@ -19,13 +19,8 @@ order by startdatum desc;
 
 
 -- Create indices and primary key
-CREATE INDEX ON lehrgangs_controlling.teilnehmer (startdatum);
-ALTER TABLE lehrgangs_controlling.teilnehmer ADD PRIMARY KEY (lead_id);
+CREATE INDEX ON kc.teilnehmer (startdatum);
+ALTER TABLE kc.teilnehmer ADD PRIMARY KEY (lead_id);
 
--- Set constraints to table
-ALTER TABLE lehrgangs_controlling.massnahmen_teilnehmer
-ADD CONSTRAINT fk_lead
-FOREIGN KEY (lead_id)
-REFERENCES lehrgangs_controlling.teilnehmer (lead_id);
-
-
+-- Set table owner
+ALTER TABLE kc.teilnehmer OWNER TO read_only;

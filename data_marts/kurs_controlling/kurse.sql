@@ -1,6 +1,6 @@
  -- Create Table kurse
  Create TABLE kc.kurse AS
- SELECT qs_qm_lehrgange.app_item_id,
+ SELECT qs_qm_lehrgange.app_item_id AS kurs_id_qm,
     qs_qm_lehrgange.fulfillment_components_id_2::numeric::integer AS kurs_id,
     qs_qm_lehrgange.titel_3 AS kurs_titel,
     qs_qm_lehrgange.fachgruppe::json ->> 'text'::text AS kurs_fachgruppe,
@@ -19,11 +19,11 @@
    FROM podio.qs_qm_lehrgange
   WHERE qs_qm_lehrgange.app_item_id <> 453;
   
- -- Create primary key & not null 
- ALTER TABLE IF EXISTS kc.kurse
-   ALTER COLUMN kurs_id SET NOT NULL;
-  
- ALTER TABLE IF EXISTS kc.kurse
+ -- Create indices
+ALTER TABLE IF EXISTS kc.kurse
    ADD PRIMARY KEY (kurs_id);
    
- --
+CREATE UNIQUE INDEX ON kc.kurse (kurs_id_qm);
+
+-- Set table owner
+ALTER TABLE kc.kurse OWNER TO read_only;

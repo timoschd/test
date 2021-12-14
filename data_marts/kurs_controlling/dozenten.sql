@@ -1,8 +1,8 @@
  -- Create Table dozenten
  Create TABLE kc.dozenten AS
- SELECT qs_dozenteninformationen.app_item_id,
+ SELECT qs_dozenteninformationen.app_item_id as dozent_id_qm,
     qs_dozenteninformationen.verbindung::json ->> 'title'::text AS dozent_name,
-    qs_dozenteninformationen.dozenten_id::numeric::integer AS dozent_id_qm,
+    qs_dozenteninformationen.dozenten_id::numeric::integer AS dozent_id,
     qs_dozenteninformationen.kategorien::json ->> 'text'::text AS dozent_vertragsstatus,
     qs_dozenteninformationen.fachgruppe::json ->> 'text'::text AS dozent_fachgruppe,
     (qs_dozenteninformationen.gultig_ab::json ->> 'start_date_utc'::text)::date AS dozent_gueltig_ab,
@@ -15,11 +15,11 @@
     qs_dozenteninformationen.gehalt_pro_monat::numeric AS dozent_gehalt_pro_monat
    FROM podio.qs_dozenteninformationen;
    
-  -- Create primary key & not null 
+  -- Create indices
   ALTER TABLE IF EXISTS kc.dozenten
-    ALTER COLUMN dozent_unique_id SET NOT NULL;
-  
-  ALTER TABLE IF EXISTS kc.dozenten
-    ADD PRIMARY KEY (dozent_unique_id);
-   
- --
+    ADD PRIMARY KEY (dozent_id);
+
+ CREATE UNIQUE INDEX ON kc.dozenten (dozent_id_qm);
+
+-- Set table owner
+ALTER TABLE kc.dozenten OWNER TO read_only;
