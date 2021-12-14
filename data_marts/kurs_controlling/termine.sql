@@ -1,6 +1,6 @@
 
 -- Create Table termine
-Create TABLE lehrgangs_controlling.termine AS
+Create TABLE kc.termine AS
 SELECT qs_terminmanagement.app_item_id,
     qs_terminmanagement.tutoriengruppen_id::numeric AS termin_id,
     qs_terminmanagement.terminart::json ->> 'text'::text AS termin_terminart,
@@ -15,17 +15,17 @@ SELECT qs_terminmanagement.app_item_id,
 FROM podio.qs_terminmanagement;
 
 -- Add indices and primary keys
-ALTER TABLE lehrgangs_controlling.termine ADD COLUMN id SERIAL PRIMARY KEY;
+ALTER TABLE kc.termine ADD COLUMN id SERIAL PRIMARY KEY;
 
 -- Set constraints to table (no unique col available)
-CREATE UNIQUE INDEX ON lehrgangs_controlling.lehrgaenge (app_item_id);
+CREATE UNIQUE INDEX ON kc.kurse (app_item_id);
 
-ALTER TABLE lehrgangs_controlling.termine
+ALTER TABLE kc.termine
 ADD CONSTRAINT fk_lehrgang
 FOREIGN KEY (qm_lehrgang_id)
-REFERENCES lehrgangs_controlling.lehrgaenge (app_item_id);
+REFERENCES kc.lehrgaenge (app_item_id);
 
-ALTER TABLE lehrgangs_controlling.termine
+ALTER TABLE kc.termine
 ADD CONSTRAINT fk_dozent
 FOREIGN KEY (dozent_unique_id)
-REFERENCES lehrgangs_controlling.dozenten (dozent_unique_id);
+REFERENCES kc.dozenten (dozent_unique_id);
