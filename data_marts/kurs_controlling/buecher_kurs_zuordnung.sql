@@ -25,7 +25,7 @@ FROM podio.qs_bucherliste);
 ALTER TABLE kc.buecher_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
 
 CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id_qm);
-CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id;
+CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id);
 
 -- Set forgein constraints
 ALTER TABLE kc.buecher_kurs_zuordnung
