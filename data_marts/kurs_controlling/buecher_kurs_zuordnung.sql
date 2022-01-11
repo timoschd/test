@@ -18,7 +18,8 @@ SELECT
 	(cast(lizenz_gultig_bis as json)->>'start_date')::date as lizenz_gueltig_bis,
 	cast(lizenzbereiche as json)->>'text' as lizenzbereiche,
 	cast(lizenzart as json)->>'text' as lizenzart,
-	lizenz_anmerkung as anmerkungen_zur_lizenz
+	lizenz_anmerkung as anmerkungen_zur_lizenz,
+	last_event_on
 FROM podio.qs_bucherliste);
 
 -- SET INDICIES & Create PRIMARY KEY 

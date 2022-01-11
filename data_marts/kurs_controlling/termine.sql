@@ -11,7 +11,8 @@ SELECT qs_terminmanagement.app_item_id,
 	(fulfillment_component_2::json ->> 'app_item_id')::int as kurs_id_qm,
     qs_terminmanagement.anzahl_teilnehmer::numeric AS termin_anzahl_teilnehmer,
     (qs_terminmanagement.gultig_ab::json ->> 'start_date'::text)::date AS termin_gultig_ab,
-    (qs_terminmanagement.gultig_bis::json ->> 'start_date'::text)::date AS termin_gultig_bis
+    (qs_terminmanagement.gultig_bis::json ->> 'start_date'::text)::date AS termin_gultig_bis,
+    last_event_on
 FROM podio.qs_terminmanagement;
 
 -- Add indices and primary keys

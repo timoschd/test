@@ -5,7 +5,8 @@ WITH temptable AS (
             massnahmen_organisation_courses.app_item_id_formatted AS massnahmen_id_qm,
             massnahmen_organisation_courses.titel AS massnahmen_titel,
             json_array_elements((massnahmen_organisation_courses.json_coursedetails_new::json -> 0) -> 'Komponenten'::text) AS lehrgangsdetails,
-            CONCAT('CRSE', massnahmen_organisation_courses.courses_sales_management::json ->> 'app_item_id') as massnahmen_id_sales
+            CONCAT('CRSE', massnahmen_organisation_courses.courses_sales_management::json ->> 'app_item_id') as massnahmen_id_sales,
+            last_event_on
             FROM podio.massnahmen_organisation_courses
         ), temptable_2 AS (
          SELECT temptable.app_item_id,
@@ -16,7 +17,8 @@ WITH temptable AS (
             (temptable.lehrgangsdetails ->> 'fmtCmpId'::text)::integer AS kurs_id,
             temptable.lehrgangsdetails ->> 'roleTitle'::text AS kurs_fachbereich,
             (temptable.lehrgangsdetails ->> 'Dauer'::text)::double precision AS kurs_dauer_in_wochen,
-            row_number() OVER (PARTITION BY temptable.app_item_id) AS kurs_reihenfolge
+            row_number() OVER (PARTITION BY temptable.app_item_id) AS kurs_reihenfolge,
+            temptable.last_event_on
             FROM temptable
         )
 SELECT temptable_2.app_item_id,
@@ -28,7 +30,8 @@ SELECT temptable_2.app_item_id,
    temptable_2.kurs_fachbereich,
    temptable_2.kurs_dauer_in_wochen,
    temptable_2.kurs_reihenfolge,
-   sum(temptable_2.kurs_dauer_in_wochen) OVER (PARTITION BY temptable_2.app_item_id ORDER BY temptable_2.kurs_reihenfolge) AS kurs_dauer_in_wochen_cumsum
+   sum(temptable_2.kurs_dauer_in_wochen) OVER (PARTITION BY temptable_2.app_item_id ORDER BY temptable_2.kurs_reihenfolge) AS kurs_dauer_in_wochen_cumsum,
+   temptable2.last_event_on
    FROM temptable_2
    WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse);
    

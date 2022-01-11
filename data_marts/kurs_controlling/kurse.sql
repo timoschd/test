@@ -15,7 +15,8 @@
     qs_qm_lehrgange.tutorienzeit_gesamt_2::numeric AS kurs_tutorienzeit_pro_woche,
     qs_qm_lehrgange.lerngruppenzeit_gesamt_2::numeric AS kurs_lerngruppenzeit_pro_woche,
     qs_qm_lehrgange.onboardingzeit_gesamt::numeric AS kurs_onboardingzeit_pro_woche,
-    qs_qm_lehrgange.prufungsvorbereitungszeit_gesamt::numeric AS kurs_prufungsvorbereitungszeit_pro_woche
+    qs_qm_lehrgange.prufungsvorbereitungszeit_gesamt::numeric AS kurs_prufungsvorbereitungszeit_pro_woche,
+    last_event_on
    FROM podio.qs_qm_lehrgange
   WHERE qs_qm_lehrgange.app_item_id <> 453;
   

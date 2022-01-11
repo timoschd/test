@@ -12,7 +12,8 @@
     qs_dozenteninformationen.sonderaufgaben_in_stunden_pro_woche::numeric AS dozenten_sonderaufgaben_pro_woche,
     qs_dozenteninformationen.arbeitsstunden_pro_woche::numeric AS dozent_stunden_pro_woche,
     qs_dozenteninformationen.gehalt_pro_stunde::numeric AS dozent_gehalt_pro_stunde,
-    qs_dozenteninformationen.gehalt_pro_monat::numeric AS dozent_gehalt_pro_monat
+    qs_dozenteninformationen.gehalt_pro_monat::numeric AS dozent_gehalt_pro_monat,
+    last_event_on
    FROM podio.qs_dozenteninformationen;
    
   -- Create indices

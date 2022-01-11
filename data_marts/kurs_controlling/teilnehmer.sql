@@ -8,7 +8,8 @@ bildungsgutscheinnummer,
 (startdatum_bildungsgutschein::json ->> 'start_date')::date as startdatum_bildungsgutschein,
 zeiteinsatz::json ->> 'text' as zeiteinsatz,
 anzahl_monate_bgs::numeric::int,
-calclehrgangsgebuehren as gebuehren_gesamt 
+calclehrgangsgebuehren as gebuehren_gesamt,
+last_event_on
 
 FROM podio.sales_management_leads
 	WHERE sales_management_leads.auftragsdatum IS NOT NULL

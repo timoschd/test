@@ -15,7 +15,8 @@
 	(massnahmen_organisation_courses.gultig_bis_2::json->>'start_date')::date as gueltig_bis,
 	massnahmen_organisation_courses.calcgebuehren::numeric AS gebuehren,
 	massnahmen_organisation_courses.massnahmenbogen_item_id::integer,
-	massnahmen_organisation_courses.massnahmenbogen_titel	
+	massnahmen_organisation_courses.massnahmenbogen_titel,
+	last_event_on	
   FROM podio.massnahmen_organisation_courses
 		   
   -- Create primary key & not null 

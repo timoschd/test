@@ -4,7 +4,8 @@
         SELECT sales_management_leads.app_item_id as lead_id,
 			(sales_management_leads.startdatum::json ->> 'start_date'::text)::date AS teilnehmer_startdatum,
             sales_management_leads.zeiteinsatz::json ->> 'text'::text AS teilnehmer_zeiteinsatz,
-            json_array_elements(sales_management_leads.json_coursedetails::json -> 'Massnahmen'::text) AS massnahmendetails
+            json_array_elements(sales_management_leads.json_coursedetails::json -> 'Massnahmen'::text) AS massnahmendetails,
+            last_event_on
            FROM podio.sales_management_leads
          WHERE sales_management_leads.auftragsdatum IS NOT NULL
 		    AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
@@ -19,7 +20,8 @@
             temptable.massnahmendetails ->> 'ID'::text AS massnahmen_id_sales,
             (temptable.massnahmendetails ->> 'Ber_Gebühr'::text)::double precision AS massnahmen_gebuhr_nach_bgs,
             round((temptable.massnahmendetails ->> 'Dauer'::text)::numeric)::integer AS massnahmen_dauer_in_wochen,
-            row_number() OVER (PARTITION BY temptable.lead_id) AS massnahmen_reihenfolge
+            row_number() OVER (PARTITION BY temptable.lead_id) AS massnahmen_reihenfolge,
+            temptable.last_event_on
            FROM temptable
            ), 
 		temptable_3 AS (
@@ -31,7 +33,8 @@
             temptable_2.massnahmen_gebuhr_nach_bgs,
             temptable_2.massnahmen_dauer_in_wochen,
             temptable_2.massnahmen_reihenfolge,
-            sum(temptable_2.massnahmen_dauer_in_wochen) OVER (PARTITION BY temptable_2.lead_id ORDER BY temptable_2.massnahmen_reihenfolge) AS massnahmen_dauer_in_wochen_cumsum
+            sum(temptable_2.massnahmen_dauer_in_wochen) OVER (PARTITION BY temptable_2.lead_id ORDER BY temptable_2.massnahmen_reihenfolge) AS massnahmen_dauer_in_wochen_cumsum,
+            temptable2.last_event_on
            FROM temptable_2
            )
 		SELECT temptable_3.lead_id,
@@ -43,12 +46,13 @@
 			temptable_3.massnahmen_dauer_in_wochen,
 			temptable_3.massnahmen_reihenfolge,
 			temptable_3.massnahmen_dauer_in_wochen_cumsum,
-			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum
+			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum,
+            temptable3.last_event_on
 		   FROM temptable_3
 		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen);
 		
 -- Set indices & PRIMARY KEY
-ALTER TABLE kc.massnahmen_teilnehmer_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
+ALTER TABLE kc.massnahmen_teilnehmer_zuordnung ADD PRIMARY KEY (lead_id, massnahmen_id_sales );
 
 CREATE INDEX ON kc.massnahmen_teilnehmer_zuordnung (lead_id);
 
