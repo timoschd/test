@@ -17,10 +17,10 @@
    FROM podio.qs_dozenteninformationen;
    
   -- Create indices
-  ALTER TABLE IF EXISTS kc.dozenten
+ALTER TABLE IF EXISTS kc.dozenten
     ADD PRIMARY KEY (dozent_id_qm);
 
- CREATE INDEX ON kc.dozenten (dozent_id);
+CREATE INDEX ON kc.dozenten (dozent_id);
 
 -- Set table owner
 ALTER TABLE kc.dozenten OWNER TO read_only;
