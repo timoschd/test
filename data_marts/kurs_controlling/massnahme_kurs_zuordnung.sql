@@ -31,7 +31,7 @@ SELECT temptable_2.app_item_id,
    temptable_2.kurs_dauer_in_wochen,
    temptable_2.kurs_reihenfolge,
    sum(temptable_2.kurs_dauer_in_wochen) OVER (PARTITION BY temptable_2.app_item_id ORDER BY temptable_2.kurs_reihenfolge) AS kurs_dauer_in_wochen_cumsum,
-   temptable2.last_event_on
+   temptable_2.last_event_on
    FROM temptable_2
    WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse);
    

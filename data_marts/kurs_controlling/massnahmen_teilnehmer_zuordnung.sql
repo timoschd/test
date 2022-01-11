@@ -34,7 +34,7 @@
             temptable_2.massnahmen_dauer_in_wochen,
             temptable_2.massnahmen_reihenfolge,
             sum(temptable_2.massnahmen_dauer_in_wochen) OVER (PARTITION BY temptable_2.lead_id ORDER BY temptable_2.massnahmen_reihenfolge) AS massnahmen_dauer_in_wochen_cumsum,
-            temptable2.last_event_on
+            temptable_2.last_event_on
            FROM temptable_2
            )
 		SELECT temptable_3.lead_id,
@@ -47,7 +47,7 @@
 			temptable_3.massnahmen_reihenfolge,
 			temptable_3.massnahmen_dauer_in_wochen_cumsum,
 			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum,
-            temptable3.last_event_on
+            temptable_3.last_event_on
 		   FROM temptable_3
 		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen);
 		
