@@ -32,7 +32,8 @@ CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id);
 ALTER TABLE kc.buecher_kurs_zuordnung
 ADD CONSTRAINT fk_kurs
 FOREIGN KEY (kurs_id_qm)
-REFERENCES kc.kurse (kurs_id_qm);
+REFERENCES kc.kurse (kurs_id_qm)
+DEFERRABLE INITIALLY DEFERRED;
 
 -- Set table owner
 ALTER TABLE kc.buecher_kurs_zuordnung OWNER TO read_only;
