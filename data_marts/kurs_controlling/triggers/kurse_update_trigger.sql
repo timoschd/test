@@ -31,7 +31,7 @@ RETURNS trigger AS
       last_event_on
      FROM podio.qs_qm_lehrgange
         WHERE qs_qm_lehrgange.app_item_id <> 453
-            AND (last_event_on > (SELECT max(last_event_on) FROM kc.kurse)	OR app_item_id NOT IN (SELECT kurs_id_qm FROM kc.kurse));
+            AND (last_event_on > (SELECT max(last_event_on) FROM kc.kurse)	OR app_item_id NOT IN (SELECT kurs_id_qm FROM kc.kurse))
 
     ON CONFLICT (kurs_id_qm)
     DO NOTHING;

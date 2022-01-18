@@ -30,7 +30,7 @@ RETURNS trigger AS
 	massnahmen_organisation_courses.massnahmenbogen_titel,
 	last_event_on	
   FROM podio.massnahmen_organisation_courses
-            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)	OR app_item_id_formatted NOT IN (SELECT massnahmen_id FROM kc.massnahmen));
+            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)	OR app_item_id NOT IN (SELECT massnahmen_id FROM kc.massnahmen))
 
     ON CONFLICT (massnahmen_id)
     DO NOTHING;

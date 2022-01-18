@@ -1,6 +1,18 @@
--- create table with kurses added to corresponding massnahmen
-CREATE TABLE kc.massnahme_kurs_zuordnung AS
-WITH temptable AS (
+-- CREATE TRIGGER FUNCTION
+CREATE OR REPLACE FUNCTION kc.upsert_massnahme_kurse()
+RETURNS trigger AS
+    $BODY$
+    BEGIN
+
+
+    -- DELETE conflicts
+    DELETE FROM kc.massnahme_kurs_zuordnung
+    WHERE app_item_id IN (SELECT app_item_id FROM podio.massnahmen_organisation_courses 
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahme_kurs_zuordnung)
+            );
+    -- UPSERT of newer entries
+    INSERT INTO kc.massnahme_kurs_zuordnung
+    WITH temptable AS (
          SELECT massnahmen_organisation_courses.app_item_id,
             massnahmen_organisation_courses.app_item_id_formatted AS massnahmen_id_qm,
             massnahmen_organisation_courses.titel AS massnahmen_titel,
@@ -33,28 +45,24 @@ SELECT temptable_2.app_item_id,
    sum(temptable_2.kurs_dauer_in_wochen) OVER (PARTITION BY temptable_2.app_item_id ORDER BY temptable_2.kurs_reihenfolge) AS kurs_dauer_in_wochen_cumsum,
    temptable_2.last_event_on
    FROM temptable_2
-   WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse);
-   
--- Set indices
-ALTER TABLE kc.massnahme_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
-CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_sales);
-CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_qm);
-CREATE INDEX ON kc.massnahme_kurs_zuordnung (kurs_id);
+   WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse)
+   AND  (last_event_on > (SELECT max(last_event_on) FROM kc.massnahme_kurs_zuordnung)	OR app_item_id NOT IN (SELECT app_item_id FROM kc.massnahme_kurs_zuordnung))
+
+    ON CONFLICT (app_item_id)
+    DO NOTHING;
+
+    RETURN NULL;
+    END;
+
+    $BODY$
+LANGUAGE plpgsql;
 
 
--- Set forgein constraints
-ALTER TABLE kc.massnahme_kurs_zuordnung
-ADD CONSTRAINT fk_massnahme
-FOREIGN KEY (massnahmen_id_sales)
-REFERENCES kc.massnahmen (massnahmen_id_sales)
-DEFERRABLE INITIALLY DEFERRED;
+-- DROP TRIGGER
+DROP TRIGGER IF EXISTS trig_upsert_massnahme_kurse ON podio.massnahmen_organisation_courses;
 
-ALTER TABLE kc.massnahme_kurs_zuordnung
-ADD CONSTRAINT fk_kurs
-FOREIGN KEY (kurs_id)
-REFERENCES kc.kurse (kurs_id)
-DEFERRABLE INITIALLY DEFERRED;
-
--- Set table owner
-ALTER TABLE kc.massnahme_kurs_zuordnung OWNER TO read_only;
-
+-- CREATE TRIGGER for UPDATE FUNCTION
+CREATE TRIGGER trig_upsert_massnahme_kurse
+    AFTER INSERT OR UPDATE ON podio.massnahmen_organisation_courses
+    FOR EACH STATEMENT
+    EXECUTE PROCEDURE kc.upsert_massnahme_kurse();

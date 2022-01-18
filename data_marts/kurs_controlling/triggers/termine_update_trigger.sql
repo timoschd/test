@@ -26,9 +26,9 @@ RETURNS trigger AS
     last_event_on
 FROM podio.qs_terminmanagement
 WHERE (fulfillment_component_2::json ->> 'app_item_id')::int IN (SELECT kurs_id_qm FROM kc.kurse)
-            AND (last_event_on > (SELECT max(last_event_on) FROM kc.termine)	OR app_item_id NOT IN (SELECT termin_id FROM kc.termine));
+            AND (last_event_on > (SELECT max(last_event_on) FROM kc.termine)	OR app_item_id NOT IN (SELECT termin_id FROM kc.termine))
 
-    ON CONFLICT (termin_id)
+    ON CONFLICT (termin_id, id)
     DO NOTHING;
 
     RETURN NULL;

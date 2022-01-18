@@ -27,12 +27,14 @@ CREATE INDEX ON kc.termine (dozent_id_qm);
 ALTER TABLE kc.termine
 ADD CONSTRAINT fk_kurs
 FOREIGN KEY (kurs_id_qm)
-REFERENCES kc.kurse (kurs_id_qm);
+REFERENCES kc.kurse (kurs_id_qm)
+DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE kc.termine
 ADD CONSTRAINT fk_dozent
 FOREIGN KEY (dozent_id_qm)
-REFERENCES kc.dozenten (dozent_id_qm);
+REFERENCES kc.dozenten (dozent_id_qm)
+DEFERRABLE INITIALLY DEFERRED;
 
 
 -- Set table owner

@@ -32,10 +32,10 @@ RETURNS trigger AS
 	cast(lizenzart as json)->>'text' as lizenzart,
 	lizenz_anmerkung as anmerkungen_zur_lizenz,
 	last_event_on
-FROM podio.qs_bucherliste)
-            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.buecher_kurs_zuordnung)	OR app_item_id NOT IN (SELECT buch_id_qm FROM kc.buecher_kurs_zuordnung));
+FROM podio.qs_bucherliste
+            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.buecher_kurs_zuordnung)	OR app_item_id NOT IN (SELECT buch_id_qm FROM kc.buecher_kurs_zuordnung))
 
-    ON CONFLICT (buch_id_qm)
+    ON CONFLICT (buch_id_qm, kurs_id_qm)
     DO NOTHING;
 
     RETURN NULL;
