@@ -8,32 +8,32 @@ RETURNS trigger AS
     $BODY$
     BEGIN
 
-
     -- UPSERT of newer entries
     DELETE FROM kc.teilnehmer 
-    WHERE lead_id IN (SELECT app_item_id AS lead_id FROM podio.sales_management_leads 
+    WHERE lead_id IN 
+        (SELECT app_item_id AS lead_id FROM podio.sales_management_leads 
             WHERE last_event_on > (SELECT max(last_event_on) FROM kc.teilnehmer)
-            );
+        );
 
     INSERT INTO kc.teilnehmer
-    SELECT 
-    app_item_id as lead_id,
-    kategorien::json ->> 'text' as abrechnungs_kategorie,
-    (startdatum::json ->> 'start_date')::date as startdatum, 
-    bildungsgutscheinnummer,
-    (startdatum_bildungsgutschein::json ->> 'start_date')::date as startdatum_bildungsgutschein,
-    zeiteinsatz::json ->> 'text' as zeiteinsatz,
-    anzahl_monate_bgs::numeric::int,
-    calclehrgangsgebuehren as gebuehren_gesamt,
-    last_event_on
+        SELECT 
+        app_item_id as lead_id,
+        kategorien::json ->> 'text' as abrechnungs_kategorie,
+        (startdatum::json ->> 'start_date')::date as startdatum, 
+        bildungsgutscheinnummer,
+        (startdatum_bildungsgutschein::json ->> 'start_date')::date as startdatum_bildungsgutschein,
+        zeiteinsatz::json ->> 'text' as zeiteinsatz,
+        anzahl_monate_bgs::numeric::int,
+        calclehrgangsgebuehren as gebuehren_gesamt,
+        last_event_on
 
-    FROM podio.sales_management_leads
-        WHERE sales_management_leads.auftragsdatum IS NOT NULL
-            AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
-            AND ((startdatum_bildungsgutschein::json ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int) >= '2019-01-01'::date
-            OR (startdatum_bildungsgutschein::json ->> 'start_date')::date IS NULL OR anzahl_monate_bgs::numeric::int IS NULL)
-        AND (last_event_on > (SELECT max(last_event_on) FROM kc.teilnehmer)	OR app_item_id NOT IN (SELECT lead_id FROM kc.teilnehmer))
-    order by startdatum desc
+        FROM podio.sales_management_leads
+            WHERE sales_management_leads.auftragsdatum IS NOT NULL
+                AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
+                AND ((startdatum_bildungsgutschein::json ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int) >= '2019-01-01'::date
+                OR (startdatum_bildungsgutschein::json ->> 'start_date')::date IS NULL OR anzahl_monate_bgs::numeric::int IS NULL)
+            AND (last_event_on > (SELECT max(last_event_on) FROM kc.teilnehmer)	OR app_item_id NOT IN (SELECT lead_id FROM kc.teilnehmer))
+        order by startdatum desc
 
     ON CONFLICT (lead_id)
     DO NOTHING;
