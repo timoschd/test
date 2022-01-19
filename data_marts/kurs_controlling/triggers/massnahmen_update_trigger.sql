@@ -41,12 +41,26 @@ RETURNS trigger AS
     $BODY$
 LANGUAGE plpgsql;
 
+--function for upsert massnahmen and massnahmen_kruse
+CREATE OR REPLACE FUNCTION kc.upsert_massnahme_and_massnahmen_kurse()
+RETURNS trigger AS
+    $BODY$
+    BEGIN
+	perform upsert_massnahmen();
+	perform upsert_massnahme_kurse();
+    RETURN NULL;
+    END;
+
+    $BODY$
+LANGUAGE plpgsql;
+
 
 -- DROP TRIGGER
 DROP TRIGGER IF EXISTS trig_upsert_massnahmen ON podio.massnahmen_organisation_courses;
 
 -- CREATE TRIGGER for UPDATE FUNCTION
-CREATE TRIGGER trig_upsert_massnahmen
+CREATE TRIGGER trig_upsert_massnahmen_and_massnahmen_kurse
     AFTER INSERT OR UPDATE ON podio.massnahmen_organisation_courses
     FOR EACH STATEMENT
-    EXECUTE PROCEDURE kc.upsert_massnahmen();
+    EXECUTE PROCEDURE 
+	kc.upsert_massnahme_and_massnahmen_kurse();

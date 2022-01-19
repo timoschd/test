@@ -73,12 +73,36 @@ RETURNS trigger AS
     $BODY$
 LANGUAGE plpgsql;
 
+--Upsert function for teilnehmer and massnahmen_teilnehmer
+CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
+RETURNS trigger AS
+    $BODY$
+    BEGIN
+	perform upsert_teilnehmer();
+	perform upsert_massnahmen_teilnehmer();
 
--- DROP TRIGGER
-DROP TRIGGER IF EXISTS trig_upsert_massnahmen_kurse ON podio.sales_management_leads;
+    RETURN NULL;
+    END;
 
--- CREATE TRIGGER for UPDATE FUNCTION
-CREATE TRIGGER trig_upsert_massnahmen_teilnehmer
+    $BODY$
+LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trig_upsert_teilnehmer_and_massnahmen_teilnehmer ON podio.sales_management_leads;
+
+-- trigger on base podio table with function
+CREATE TRIGGER trig_upsert_teilnehmer_and_massnahmen_teilnehmer
     AFTER INSERT OR UPDATE ON podio.sales_management_leads
     FOR EACH STATEMENT
-    EXECUTE PROCEDURE kc.upsert_massnahmen_teilnehmer();
+    EXECUTE PROCEDURE kc.upsert_teilnehmer_and_massnahmen_teilnehmer();
+
+
+
+-- check triggers
+SELECT * FROM information_schema.triggers;
+
+
+
+
+
+
+

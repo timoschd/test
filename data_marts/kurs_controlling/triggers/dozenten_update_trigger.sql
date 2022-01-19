@@ -27,7 +27,7 @@ RETURNS trigger AS
     --qs_dozenteninformationen.gehalt_pro_monat::numeric AS dozent_gehalt_pro_monat,
     last_event_on
    FROM podio.qs_dozenteninformationen
-            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.dozenten)	OR app_item_id NOT IN (SELECT dozent_id_qm FROM kc.dozenten));
+            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.dozenten)	OR app_item_id NOT IN (SELECT dozent_id_qm FROM kc.dozenten))
 
     ON CONFLICT (dozent_id_qm)
     DO NOTHING;
