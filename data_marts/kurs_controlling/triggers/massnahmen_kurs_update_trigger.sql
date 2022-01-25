@@ -1,6 +1,6 @@
 -- CREATE TRIGGER FUNCTION
 CREATE OR REPLACE FUNCTION kc.upsert_massnahme_kurse()
-RETURNS trigger AS
+RETURNS void AS
     $BODY$
     BEGIN
 
@@ -48,10 +48,9 @@ SELECT temptable_2.app_item_id,
    WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse)
    AND  (last_event_on > (SELECT max(last_event_on) FROM kc.massnahme_kurs_zuordnung)	OR app_item_id NOT IN (SELECT app_item_id FROM kc.massnahme_kurs_zuordnung))
 
-    ON CONFLICT (app_item_id)
+    ON CONFLICT (massnahmen_id_sales, kurs_id)
     DO NOTHING;
 
-    RETURN NULL;
     END;
 
     $BODY$
@@ -62,8 +61,8 @@ CREATE OR REPLACE FUNCTION kc.upsert_massnahme_and_massnahmen_kurse()
 RETURNS trigger AS
     $BODY$
     BEGIN
-	perform upsert_massnahmen();
-	perform upsert_massnahme_kurse();
+	perform kc.upsert_massnahmen();
+	perform kc.upsert_massnahme_kurse();
     RETURN NULL;
     END;
 

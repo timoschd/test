@@ -36,7 +36,7 @@ SELECT temptable_2.app_item_id,
    WHERE kurs_id IN (SELECT kurs_id FROM kc.kurse);
    
 -- Set indices
-ALTER TABLE kc.massnahme_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
+ALTER TABLE kc.massnahme_kurs_zuordnung ADD PRIMARY KEY (massnahmen_id_sales, kurs_id);
 CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_sales);
 CREATE INDEX ON kc.massnahme_kurs_zuordnung (massnahmen_id_qm);
 CREATE INDEX ON kc.massnahme_kurs_zuordnung (kurs_id);

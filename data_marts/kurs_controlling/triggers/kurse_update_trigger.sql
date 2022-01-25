@@ -30,8 +30,8 @@ RETURNS trigger AS
       qs_qm_lehrgange.prufungsvorbereitungszeit_gesamt::numeric AS kurs_prufungsvorbereitungszeit_pro_woche,
       last_event_on
      FROM podio.qs_qm_lehrgange
-        WHERE qs_qm_lehrgange.app_item_id <> 453
-            AND (last_event_on > (SELECT max(last_event_on) FROM kc.kurse)	OR app_item_id NOT IN (SELECT kurs_id_qm FROM kc.kurse))
+        WHERE --qs_qm_lehrgange.app_item_id <> 453
+             (last_event_on > (SELECT max(last_event_on) FROM kc.kurse)	OR app_item_id NOT IN (SELECT kurs_id_qm FROM kc.kurse))
 
     ON CONFLICT (kurs_id_qm)
     DO NOTHING;

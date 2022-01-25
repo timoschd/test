@@ -23,7 +23,7 @@ SELECT
 FROM podio.qs_bucherliste);
 
 -- SET INDICIES & Create PRIMARY KEY 
-ALTER TABLE kc.buecher_kurs_zuordnung ADD COLUMN id SERIAL PRIMARY KEY;
+ALTER TABLE kc.buecher_kurs_zuordnung ADD PRIMARY KEY (buch_id_qm, kurs_id_qm);
 
 CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id_qm);
 CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id);

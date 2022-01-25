@@ -1,6 +1,6 @@
 -- CREATE TRIGGER FUNCTION
 CREATE OR REPLACE FUNCTION kc.upsert_massnahmen_teilnehmer()
-RETURNS trigger AS
+RETURNS void AS
     $BODY$
     BEGIN
 
@@ -67,7 +67,6 @@ RETURNS trigger AS
     ON CONFLICT (lead_id, massnahmen_id_sales)
     DO NOTHING;
 
-    RETURN NULL;
     END;
 
     $BODY$
@@ -78,8 +77,8 @@ CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
 RETURNS trigger AS
     $BODY$
     BEGIN
-	perform upsert_teilnehmer();
-	perform upsert_massnahmen_teilnehmer();
+	perform kc.upsert_teilnehmer();
+	perform kc.upsert_massnahmen_teilnehmer();
 
     RETURN NULL;
     END;

@@ -34,6 +34,7 @@ RETURNS trigger AS
 	last_event_on
 FROM podio.qs_bucherliste
             WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.buecher_kurs_zuordnung)	OR app_item_id NOT IN (SELECT buch_id_qm FROM kc.buecher_kurs_zuordnung))
+            AND app_item_id NOT IN (986)
 
     ON CONFLICT (buch_id_qm, kurs_id_qm)
     DO NOTHING;

@@ -1,13 +1,13 @@
 -- CREATE TRIGGER FUNCTION
 CREATE OR REPLACE FUNCTION kc.upsert_massnahmen()
-RETURNS trigger AS
+RETURNS void AS
     $BODY$
     BEGIN
 
 
     -- DELETE conflicts
     DELETE FROM kc.massnahmen
-    WHERE massnahmen_id IN (SELECT app_item_id AS massnahmen_id FROM podio.massnahmen_organisation_courses 
+    WHERE massnahmen_id IN (SELECT app_item_id_formatted FROM podio.massnahmen_organisation_courses 
             WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)
             );
     -- UPSERT of newer entries
@@ -30,12 +30,11 @@ RETURNS trigger AS
 	massnahmen_organisation_courses.massnahmenbogen_titel,
 	last_event_on	
   FROM podio.massnahmen_organisation_courses
-            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)	OR app_item_id NOT IN (SELECT massnahmen_id FROM kc.massnahmen))
+            WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)	OR app_item_id_formatted NOT IN (SELECT massnahmen_id FROM kc.massnahmen))
 
     ON CONFLICT (massnahmen_id)
     DO NOTHING;
 
-    RETURN NULL;
     END;
 
     $BODY$
@@ -46,8 +45,8 @@ CREATE OR REPLACE FUNCTION kc.upsert_massnahme_and_massnahmen_kurse()
 RETURNS trigger AS
     $BODY$
     BEGIN
-	perform upsert_massnahmen();
-	perform upsert_massnahme_kurse();
+	perform kc.upsert_massnahmen();
+	perform kc.upsert_massnahme_kurse();
     RETURN NULL;
     END;
 

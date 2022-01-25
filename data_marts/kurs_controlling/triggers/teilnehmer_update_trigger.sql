@@ -4,7 +4,7 @@
 -- get entries in podio table that are newer than entries in kc table (via timestamp compare)
 
 CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer()
-RETURNS trigger AS
+RETURNS void AS
     $BODY$
     BEGIN
 
@@ -38,7 +38,6 @@ RETURNS trigger AS
     ON CONFLICT (lead_id)
     DO NOTHING;
 
-    RETURN NULL;
     END;
 
     $BODY$
@@ -46,11 +45,11 @@ LANGUAGE plpgsql;
 
 --Upsert function for teilnehmer and massnahmen_teilnehmer
 CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
-RETURNS trigger AS
+RETURNS TRIGGER AS
     $BODY$
     BEGIN
-	perform upsert_teilnehmer();
-	perform upsert_massnahmen_teilnehmer();
+	perform kc.upsert_teilnehmer();
+	perform kc.upsert_massnahmen_teilnehmer();
 
     RETURN NULL;
     END;
