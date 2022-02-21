@@ -9,10 +9,10 @@ RETURNS void AS
     BEGIN
 
     -- UPSERT of newer entries
-    DELETE FROM kc.teilnehmer 
+    DELETE FROM kc.kunden 
     WHERE lead_id IN 
         (SELECT app_item_id AS lead_id FROM podio.sales_management_leads 
-            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.teilnehmer)
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.kunden)
         );
 
     INSERT INTO kc.teilnehmer
@@ -32,7 +32,7 @@ RETURNS void AS
                 AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
                 AND ((startdatum_bildungsgutschein::json ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int) >= '2019-01-01'::date
                 OR (startdatum_bildungsgutschein::json ->> 'start_date')::date IS NULL OR anzahl_monate_bgs::numeric::int IS NULL)
-            AND (last_event_on > (SELECT max(last_event_on) FROM kc.teilnehmer)	OR app_item_id NOT IN (SELECT lead_id FROM kc.teilnehmer))
+            AND (last_event_on > (SELECT max(last_event_on) FROM kc.kunden)	OR app_item_id NOT IN (SELECT lead_id FROM kc.kunden))
         order by startdatum desc
 
     ON CONFLICT (lead_id)
@@ -43,7 +43,7 @@ RETURNS void AS
     $BODY$
 LANGUAGE plpgsql;
 
---Upsert function for teilnehmer and massnahmen_teilnehmer
+--Upsert function for teilnehmer and massnahmen_teilnehmer to fix execution order
 CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
 RETURNS TRIGGER AS
     $BODY$

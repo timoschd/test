@@ -1,6 +1,18 @@
- -- Create Table massnahmen_teilnehmer_zuordnung
- Create TABLE kc.massnahmen_teilnehmer_zuordnung AS
- WITH temptable AS (
+-- CREATE TRIGGER FUNCTION
+CREATE OR REPLACE FUNCTION kc.upsert_massnahmen_teilnehmer()
+RETURNS void AS
+    $BODY$
+    BEGIN
+
+
+    -- DELETE conflicts
+    DELETE FROM kc.massnahmen_kunden_zuordnung
+    WHERE lead_id IN (SELECT app_item_id FROM podio.sales_management_leads 
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen_teilnehmer_zuordnung)
+            );
+    -- UPSERT of newer entries
+    INSERT INTO kc.massnahmen_kunden_zuordnung
+     WITH temptable AS (
         SELECT sales_management_leads.app_item_id as lead_id,
 			(sales_management_leads.startdatum::json ->> 'start_date'::text)::date AS teilnehmer_startdatum,
             sales_management_leads.zeiteinsatz::json ->> 'text'::text AS teilnehmer_zeiteinsatz,
@@ -49,28 +61,47 @@
 			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum,
             temptable_3.last_event_on
 		   FROM temptable_3
-		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen);
-		
--- Set indices & PRIMARY KEY
-ALTER TABLE kc.massnahmen_teilnehmer_zuordnung ADD PRIMARY KEY (lead_id, massnahmen_id_sales );
+		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen) 
+           AND  (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen_kunden_zuordnung) OR lead_id NOT IN (SELECT lead_id FROM kc.massnahmen_kunden_zuordnung))
 
-CREATE INDEX ON kc.massnahmen_teilnehmer_zuordnung (lead_id);
+    ON CONFLICT (lead_id, massnahmen_id_sales)
+    DO NOTHING;
 
-CREATE INDEX ON kc.massnahmen_teilnehmer_zuordnung (massnahmen_id_sales);
+    END;
 
--- Set FOREIGN KEY
-ALTER TABLE kc.massnahmen_teilnehmer_zuordnung
-ADD CONSTRAINT fk_lead
-FOREIGN KEY (lead_id)
-REFERENCES kc.teilnehmer (lead_id)
-DEFERRABLE INITIALLY DEFERRED;
+    $BODY$
+LANGUAGE plpgsql;
+
+--Upsert function for teilnehmer and massnahmen_teilnehmer
+CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
+RETURNS trigger AS
+    $BODY$
+    BEGIN
+	perform kc.upsert_teilnehmer();
+	perform kc.upsert_massnahmen_teilnehmer();
+
+    RETURN NULL;
+    END;
+
+    $BODY$
+LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trig_upsert_teilnehmer_and_massnahmen_teilnehmer ON podio.sales_management_leads;
+
+-- trigger on base podio table with function
+CREATE TRIGGER trig_upsert_teilnehmer_and_massnahmen_teilnehmer
+    AFTER INSERT OR UPDATE ON podio.sales_management_leads
+    FOR EACH STATEMENT
+    EXECUTE PROCEDURE kc.upsert_teilnehmer_and_massnahmen_teilnehmer();
 
 
-ALTER TABLE kc.massnahmen_teilnehmer_zuordnung
-ADD CONSTRAINT fk_massnahme
-FOREIGN KEY (massnahmen_id_sales) 
-REFERENCES kc.massnahmen (massnahmen_id_sales)
-DEFERRABLE INITIALLY DEFERRED;
 
--- Set table owner
-ALTER TABLE kc.massnahmen_teilnehmer_zuordnung OWNER TO read_only;
+-- check triggers
+SELECT * FROM information_schema.triggers;
+
+
+
+
+
+
+
