@@ -1,7 +1,7 @@
 -- CREATE TABLE tc.kontakte
 CREATE TABLE tc.kontakte AS
-SELECT app_item_id,
-	app_item_id_formatted AS kontakt_id,
+SELECT app_item_id AS kontakt_id,
+	app_item_id_formatted AS kontakt_id_formatted,
 	cast(anrede AS JSON)->>'text' AS anrede,
 	extract(YEAR FROM (cast(geburtsdatum AS JSON)->>'start_date')::date) AS geburtsdatum,
 	(cast(json_address AS JSON)->>'PostalCode') AS plz,
@@ -15,7 +15,7 @@ FROM podio.backoffice_kontakte;
 ALTER TABLE tc.kontakte 
     ADD PRIMARY KEY (kontakt_id);
 
-CREATE UNIQUE INDEX ON tc.kontakte (app_item_id);
+CREATE UNIQUE INDEX ON tc.kontakte (kontakt_id_formatted);
 
 -- SET OWNER
 ALTER TABLE tc.kontakte OWNER TO read_only;
