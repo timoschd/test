@@ -1,10 +1,11 @@
 --Create Table Bücher-Kurs-Zuordnung
-Create TABLE kc.buecher_kurs_zuordnung AS(
+Create TABLE kc.buecher_kurs_zuordnung AS
 SELECT
 	app_item_id as buch_id_qm,
 	item_id as buch_id,
 	titel as buch_titel,
 	lgb_title as lgb_titel,
+	kategorien->>'text' as kategorie,
 	cast(json_book as json)->>'author' as autor,
 	(auflage_2::numeric)::integer as auflage,
 	(jahr_2::numeric)::integer as jahr,
@@ -20,7 +21,7 @@ SELECT
 	cast(lizenzart as json)->>'text' as lizenzart,
 	lizenz_anmerkung as anmerkungen_zur_lizenz,
 	last_event_on
-FROM podio.qs_bucherliste);
+FROM podio.qs_bucherliste;
 
 -- SET INDICIES & Create PRIMARY KEY 
 ALTER TABLE kc.buecher_kurs_zuordnung ADD PRIMARY KEY (buch_id_qm, kurs_id_qm);
