@@ -15,7 +15,7 @@ RETURNS void AS
             WHERE last_event_on > (SELECT max(last_event_on) FROM kc.kunden)
         );
 
-    INSERT INTO kc.teilnehmer
+    INSERT INTO kc.kunden
         SELECT 
         app_item_id as lead_id,
         kategorien::json ->> 'text' as abrechnungs_kategorie,
