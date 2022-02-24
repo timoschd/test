@@ -1,12 +1,19 @@
 --Create TABLE Teilnehmer
 CREATE TABLE tc.teilnehmer AS 
-WITH teilnehmer_ids AS
+WITH teilnehmer_urls AS
 	(SELECT app_item_id AS teilnehmer_id_tutoren,
-			(cast(json_navigation AS JSON) ->> 'Kontaktid')::integer AS kontakt_id,
-			(cast(json_navigation AS JSON) ->> 'Leadsid')::integer AS lead_id,
-			(cast(json_navigation AS JSON) ->> 'FFMTID')::integer AS teilnehmer_id_boffice,
+			substring(navigation, ('https://podio.com/karrieretutorde/backoffice/apps/kontakte/items/\d+')) as kontakt_url,
+	 		substring(navigation, ('https://podio.com/karrieretutorde/backoffice/apps/fulfillment-ubersicht/items/\d+')) as fulfillment_url,
+	 		substring(navigation, ('https://podio.com/karrieretutorde/sales-management/apps/leads/items/\d+')) as leads_url, 		
 			last_event_on AS last_event_on_tutoren
 		FROM podio.tutoren_teilnehmer),
+	teilnehmer_ids AS
+	(SELECT teilnehmer_id_tutoren,
+			substring(kontakt_url, ('\d+$'))::integer as kontakt_id,
+			substring(fulfillment_url, ('\d+$'))::integer as teilnehmer_id_boffice,
+			substring(leads_url, ('\d+$'))::integer as lead_id,
+			last_event_on_tutoren
+		FROM teilnehmer_urls),
 	teilnehmer_daten AS
 	(SELECT backoffice_fulfillment_ubersicht.app_item_id AS teilnehmer_id_backoffice,
 			backoffice_fulfillment_ubersicht.account_art_leadsflow AS abrechnung,
@@ -19,13 +26,13 @@ WITH teilnehmer_ids AS
 			(backoffice_fulfillment_ubersicht.end_date ->> 'start_date'::text)::date AS teilnehmer_enddatum,
 			backoffice_fulfillment_ubersicht.last_event_on AS last_event_on_backoffice
 		FROM podio.backoffice_fulfillment_ubersicht)
-SELECT *
+SELECT 	*
 FROM teilnehmer_ids
 LEFT JOIN teilnehmer_daten ON teilnehmer_ids.teilnehmer_id_boffice = teilnehmer_daten.teilnehmer_id_backoffice;
 
 --Set key
 ALTER TABLE tc.teilnehmer
     ADD PRIMARY KEY (teilnehmer_id_tutoren);
-
+	
 -- SET OWNER
 ALTER TABLE tc.teilnehmer OWNER TO read_only;
