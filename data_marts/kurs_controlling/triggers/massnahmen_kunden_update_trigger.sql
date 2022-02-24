@@ -8,7 +8,7 @@ RETURNS void AS
     -- DELETE conflicts
     DELETE FROM kc.massnahmen_kunden_zuordnung
     WHERE lead_id IN (SELECT app_item_id FROM podio.sales_management_leads 
-            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen_teilnehmer_zuordnung)
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen_kunden_zuordnung)
             );
     -- UPSERT of newer entries
     INSERT INTO kc.massnahmen_kunden_zuordnung
