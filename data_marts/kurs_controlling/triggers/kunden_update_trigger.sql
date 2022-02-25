@@ -16,22 +16,20 @@ RETURNS void AS
         );
 
     INSERT INTO kc.kunden
-        SELECT 
-            app_item_id as lead_id,
-            sales_management_leads.auftragsberechnungen::json ->> 'app_item_id'::text AS auftragsberechnungen_id,
-            sales_management_leads.kontakt_backoffice::json ->> 'app_item_id'::text AS kontakt_id,
-            sales_management_leads.angebots_produkte::json ->> 'app_item_id'::text AS angbots_produkt_id,
-            kategorien::json ->> 'text' as abrechnungs_kategorie,
-            (startdatum::json ->> 'start_date')::date as startdatum, 
-            bildungsgutscheinnummer,
-            sales_management_leads.account_backoffice::json ->> 'title'::text AS agentur_stelle,
-            (startdatum_bildungsgutschein::json ->> 'start_date')::date as startdatum_bildungsgutschein,
-            sales_management_leads.berufsklassifikation::json ->> 'title'::text AS berufsklassifikation,
-            zeiteinsatz::json ->> 'text' as zeiteinsatz,
-            anzahl_monate_bgs::numeric::int,
-            calclehrgangsgebuehren as gebuehren_gesamt,
-            last_event_on
-
+        SELECT app_item_id AS lead_id,
+	    	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
+	        sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id'::text AS kontakt_id,
+        	sales_management_leads.angebots_produkte::JSON ->> 'app_item_id'::text AS angbots_produkt_id,
+        	kategorien::JSON ->> 'text' AS abrechnungs_kategorie,
+            (startdatum::JSON ->> 'start_date')::date AS startdatum,
+        	bildungsgutscheinnummer,
+        	sales_management_leads.account_backoffice::JSON ->> 'title'::text AS agentur_stelle,
+	        (startdatum_bildungsgutschein::JSON ->> 'start_date')::date AS startdatum_bildungsgutschein,
+	        sales_management_leads.berufsklassifikation::JSON ->> 'title'::text AS berufsklassifikation,
+	        zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,
+        	anzahl_monate_bgs::numeric::int,
+        	calclehrgangsgebuehren AS gebuehren_gesamt,
+	        last_event_on
         FROM podio.sales_management_leads
             WHERE sales_management_leads.auftragsdatum IS NOT NULL
                 AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
