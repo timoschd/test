@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS postgres_fdw WITH SCHEMA lead_tracking;
 -- CREATE server for data_warehouse
 CREATE SERVER podio_data FOREIGN DATA WRAPPER postgres_fdw OPTIONS( dbname 'data_warehouse' );
 -- CREATE USER-MAPPING for podio_data -> rwx_user
-CREATE USER MAPPING FOR rwx_user SERVER podio_data OPTIONS ( user 'rwx_user', password 'rmpp22c!tT' );
+CREATE USER MAPPING FOR rwx_user SERVER podio_data OPTIONS ( user 'rwx_user', password '' );
 -- CREATE FOREIGN TABLE kontakt_annahme
 CREATE FOREIGN TABLE lead_tracking.kontakt_annahme (app_item_id integer,
 													kontakt json,
