@@ -1,6 +1,7 @@
 -- create teilnehmer table in data mart. use all participants that paticipated in 2019 or later
 CREATE TABLE kc.kunden AS 
 SELECT app_item_id AS lead_id,
+	substring(cast(json_data_3 AS JSON) -> 'json' ->> 'fulfillment_ubersicht_url', '(\d+)\s?$')::integer,
 	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
 	sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id'::text AS kontakt_id,
 	sales_management_leads.angebots_produkte::JSON ->> 'app_item_id'::text AS angbots_produkt_id,
@@ -14,14 +15,7 @@ SELECT app_item_id AS lead_id,
 	anzahl_monate_bgs::numeric::int,
 	calclehrgangsgebuehren AS gebuehren_gesamt,
 	last_event_on
-FROM podio.sales_management_leads
-WHERE sales_management_leads.auftragsdatum IS NOT NULL
-	AND (sales_management_leads.status2::JSON ->> 'text'::text) <> 'STORNO'::text
-	AND ((startdatum_bildungsgutschein::JSON ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int) >= '2019-01-01'::date
-	OR (startdatum_bildungsgutschein::JSON ->> 'start_date')::date IS NULL
-	OR anzahl_monate_bgs::numeric::int IS NULL)
-ORDER BY startdatum DESC;
-
+FROM podio.sales_management_leads;
 
 -- Create indices and primary key
 CREATE INDEX ON kc.kunden (startdatum);

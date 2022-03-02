@@ -7,10 +7,6 @@
             json_array_elements(sales_management_leads.json_coursedetails::json -> 'Massnahmen'::text) AS massnahmendetails,
             last_event_on
            FROM podio.sales_management_leads
-         WHERE sales_management_leads.auftragsdatum IS NOT NULL
-		    AND (sales_management_leads.status2::json ->> 'text'::text) <> 'STORNO'::text
-		    AND ((startdatum_bildungsgutschein::json ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int) >= '2019-01-01'::date  -- filter entries to all Teilnehmer that participated in 2019 or later
-		        OR (startdatum_bildungsgutschein::json ->> 'start_date')::date IS NULL OR anzahl_monate_bgs::numeric::int IS NULL)	
           ), 
 		temptable_2 AS (
         SELECT temptable.lead_id,
@@ -48,8 +44,7 @@
 			temptable_3.massnahmen_dauer_in_wochen_cumsum,
 			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum,
             temptable_3.last_event_on
-		   FROM temptable_3
-		   WHERE massnahmen_id_sales IN (SELECT massnahmen_id_sales FROM kc.massnahmen);
+		   FROM temptable_3;
 		
 -- Set indices & PRIMARY KEY
 ALTER TABLE kc.massnahmen_kunden_zuordnung ADD PRIMARY KEY (lead_id, massnahmen_id_sales );
@@ -65,7 +60,7 @@ FOREIGN KEY (lead_id)
 REFERENCES kc.kunden (lead_id)
 DEFERRABLE INITIALLY DEFERRED;
 
-
+--klappt nicht
 ALTER TABLE kc.massnahmen_kunden_zuordnung
 ADD CONSTRAINT fk_massnahme
 FOREIGN KEY (massnahmen_id_sales) 

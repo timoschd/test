@@ -13,8 +13,7 @@ SELECT qs_terminmanagement.app_item_id,
     (qs_terminmanagement.gultig_ab::json ->> 'start_date'::text)::date AS termin_gultig_ab,
     (qs_terminmanagement.gultig_bis::json ->> 'start_date'::text)::date AS termin_gultig_bis,
     last_event_on
-FROM podio.qs_terminmanagement
-WHERE (fulfillment_component_2::json ->> 'app_item_id')::int IN (SELECT kurs_id_qm FROM kc.kurse);
+FROM podio.qs_terminmanagement;
 
 -- Add indices and primary keys
 ALTER TABLE kc.termine ADD COLUMN id SERIAL PRIMARY KEY;
@@ -30,6 +29,7 @@ FOREIGN KEY (kurs_id_qm)
 REFERENCES kc.kurse (kurs_id_qm)
 DEFERRABLE INITIALLY DEFERRED;
 
+--dozent key klappt nicht
 ALTER TABLE kc.termine
 ADD CONSTRAINT fk_dozent
 FOREIGN KEY (dozent_id_qm)

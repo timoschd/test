@@ -17,7 +17,7 @@
 	massnahmen_organisation_courses.massnahmenbogen_item_id::integer,
 	massnahmen_organisation_courses.massnahmenbogen_titel,
 	last_event_on	
-  FROM podio.massnahmen_organisation_courses
+  FROM podio.massnahmen_organisation_courses;
 		   
   -- Create primary key & not null 
 CREATE UNIQUE INDEX ON kc.massnahmen (massnahmen_id_sales);
