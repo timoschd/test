@@ -27,7 +27,7 @@ RETURNS trigger AS
 FROM podio.qs_terminmanagement
 WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.termine)	OR app_item_id NOT IN (SELECT termin_id FROM kc.termine))
 
-    ON CONFLICT (termin_id, id)
+    ON CONFLICT (termin_id) 
     DO NOTHING;
 
     RETURN NULL;

@@ -17,7 +17,7 @@ FROM podio.qs_terminmanagement;
 
 -- Add indices and primary keys
 ALTER TABLE kc.termine
-    ADD PRIMARY KEY ();
+    ADD PRIMARY KEY ();  #TODO
 
 CREATE INDEX ON kc.termine (termin_id);
 CREATE INDEX ON kc.termine (kurs_id_qm);
@@ -30,7 +30,7 @@ FOREIGN KEY (kurs_id_qm)
 REFERENCES kc.kurse (kurs_id_qm)
 DEFERRABLE INITIALLY DEFERRED;
 
---dozent key klappt nicht
+--dozent key klappt nicht #TODO
 ALTER TABLE kc.termine
 ADD CONSTRAINT fk_dozent
 FOREIGN KEY (dozent_id_qm)
