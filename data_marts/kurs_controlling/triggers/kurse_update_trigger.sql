@@ -8,10 +8,10 @@ RETURNS trigger AS
     -- DELETE conflicts
     DELETE FROM kc.kurse
     WHERE kurs_id IN (SELECT app_item_id FROM podio.backoffice_fulfillment_components
-            WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM kc.teilnehmer)
+            WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM kc.kurse)
             );
     -- UPSERT of newer entries
-    INSERT INTO kc.teilnehmer
+    INSERT INTO kc.kurse
     WITH TEMP AS
 	(SELECT app_item_id AS kurs_id, --backoffice id
  			substring(qm_ffmt_comp, ('https://podio.com/karrieretutorde/qs/apps/qm-lehrgange/items/\d+')) AS kurs_url_qm,
