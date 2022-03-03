@@ -17,7 +17,7 @@ FROM podio.qs_terminmanagement;
 
 -- Add indices and primary keys
 ALTER TABLE kc.termine
-    ADD PRIMARY KEY ();  #TODO
+    ADD PRIMARY KEY (termin_id);  
 
 CREATE INDEX ON kc.termine (termin_id);
 CREATE INDEX ON kc.termine (kurs_id_qm);
