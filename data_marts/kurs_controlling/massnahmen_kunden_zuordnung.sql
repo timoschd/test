@@ -60,7 +60,6 @@ FOREIGN KEY (lead_id)
 REFERENCES kc.kunden (lead_id)
 DEFERRABLE INITIALLY DEFERRED;
 
---klappt nicht
 ALTER TABLE kc.massnahmen_kunden_zuordnung
 ADD CONSTRAINT fk_massnahme
 FOREIGN KEY (massnahmen_id_sales) 

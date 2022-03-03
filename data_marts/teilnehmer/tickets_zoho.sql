@@ -59,12 +59,14 @@ ALTER TABLE tc.tickets_zoho
 ALTER TABLE tc.tickets_zoho
     ADD constraint fk_kunden
 	FOREIGN KEY (lead_id_podio)
-	REFERENCES kc.kunden (lead_id);
+	REFERENCES kc.kunden (lead_id)
+	DEFERRABLE INITIALLY DEFERRED;
 	
 ALTER TABLE tc.tickets_zoho
     ADD constraint fk_teilnehmer
 	FOREIGN KEY (teilnehmer_id_tutoren_podio)
-	REFERENCES tc.teilnehmer (teilnehmer_id_tutoren);
+	REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
+	DEFERRABLE INITIALLY DEFERRED;
 
 -- Set Owner
 ALTER TABLE tc.tickets_zoho
