@@ -19,7 +19,7 @@ RETURNS trigger AS
 	lgb_title as lgb_titel,
 	cast(json_book as json)->>'author' as autor,
 	(auflage_2::numeric)::integer as auflage,
-	(jahr_2::numeric)::integer as jahr,
+	(jahr_2::text::numeric)::integer as jahr,
 	isbn_2 as isbn,
 	kosten_fachliteratur::numeric as buch_kosten,
 	(cast(gultig_ab as json)->>'start_date')::date as buch_gultig_ab,
