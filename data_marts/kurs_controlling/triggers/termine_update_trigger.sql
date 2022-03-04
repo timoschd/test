@@ -40,7 +40,7 @@ LANGUAGE plpgsql;
 -- DROP TRIGGER
 DROP TRIGGER IF EXISTS trig_upsert_termine ON podio.qs_terminmanagement;
 
--- CREATE TRIGGER for UPDATE FUNCTION
+-- CREATE TRIGGER for UPDATE FUNCTION  # TODO stopped trigger
 CREATE TRIGGER trig_upsert_termine
     AFTER INSERT OR UPDATE ON podio.qs_terminmanagement
     FOR EACH STATEMENT
