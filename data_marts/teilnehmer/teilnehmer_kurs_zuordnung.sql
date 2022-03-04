@@ -24,5 +24,10 @@ ALTER TABLE tc.teilnehmer_kurs_zuordnung
 	REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
 	DEFERRABLE INITIALLY DEFERRED;
 	
+ALTER TABLE tc.teilnehmer_kurs_zuordnung
+	ADD CONSTRAINT fk_kurse
+	FOREIGN KEY (kurs_id_backoffice)
+	REFERENCES kc.kurse (kurs_id);
+	
 -- SET OWNER
 ALTER TABLE tc.teilnehmer_kurs_zuordnung OWNER TO read_only;

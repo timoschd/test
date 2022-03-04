@@ -56,13 +56,13 @@ FROM zoho.tickets;
 ALTER TABLE tc.tickets_zoho
     ADD PRIMARY KEY (ticket_id);
 
-ALTER TABLE tc.tickets_zoho
+ALTER TABLE tc.tickets_zoho -- #TODO
     ADD constraint fk_kunden
 	FOREIGN KEY (lead_id_podio)
 	REFERENCES kc.kunden (lead_id)
 	DEFERRABLE INITIALLY DEFERRED;
 	
-ALTER TABLE tc.tickets_zoho
+ALTER TABLE tc.tickets_zoho -- #TODO
     ADD constraint fk_teilnehmer
 	FOREIGN KEY (teilnehmer_id_tutoren_podio)
 	REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
