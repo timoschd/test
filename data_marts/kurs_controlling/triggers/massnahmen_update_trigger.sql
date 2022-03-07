@@ -7,7 +7,7 @@ RETURNS trigger AS
 
     -- DELETE conflicts
     DELETE FROM kc.massnahmen
-    WHERE massnahmen_id IN (SELECT app_item_id_formatted FROM podio.massnahmen_organisation_courses 
+    WHERE massnahmen_id IN (SELECT app_item_id_formatted FROM podio.massnahmen_organisation_courses  #TODO disabled trigger, no delete on primary key massnahmen_id_sales?
             WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)
             );
     -- UPSERT of newer entries
