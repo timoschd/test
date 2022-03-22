@@ -8,7 +8,7 @@ RETURNS trigger AS
     -- DELETE conflicts
     DELETE FROM tc.teilnehmer
     WHERE teilnehmer_id_tutoren IN (SELECT app_item_id AS teilnehmer_id_tutoren FROM podio.tutoren_teilnehmer
-            WHERE last_event_on > (SELECT max(last_event_on) FROM tc.teilnehmer)
+            WHERE last_event_on > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer)
             );
     -- UPSERT of newer entries
     INSERT INTO tc.teilnehmer
