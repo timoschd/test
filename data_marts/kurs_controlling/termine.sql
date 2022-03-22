@@ -30,7 +30,7 @@ FOREIGN KEY (kurs_id_qm)
 REFERENCES kc.kurse (kurs_id_qm)
 DEFERRABLE INITIALLY DEFERRED;
 
---dozent key klappt nicht #TODO
+--dozent key klappt nicht
 ALTER TABLE kc.termine
 ADD CONSTRAINT fk_dozent
 FOREIGN KEY (dozent_id_qm)

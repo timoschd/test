@@ -56,7 +56,7 @@ FROM zoho.tickets;
 ALTER TABLE tc.tickets_zoho
     ADD PRIMARY KEY (ticket_id);
 
-ALTER TABLE tc.tickets_zoho -- #TODO
+ALTER TABLE tc.tickets_zoho
     ADD constraint fk_kunden
 	FOREIGN KEY (lead_id_podio)
 	REFERENCES kc.kunden (lead_id)
