@@ -1,0 +1,10 @@
+-- Create Data Mart schemas
+DROP SCHEMA IF EXISTS kc;
+DROP SCHEMA IF EXISTS tc;
+
+CREATE SCHEMA kc;
+ALTER SCHEMA kc OWNER TO read_only;
+
+CREATE SCHEMA tc;
+ALTER SCHEMA tc OWNER TO read_only;
+
