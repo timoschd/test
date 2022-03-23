@@ -1,4 +1,23 @@
  -- Create Table dozenten
+ 
+ CREATE TABLE kc.dozenten_ (
+	dozent_anzahl_teilnehmer integer,
+	dozent_fachgruppe text,
+	dozent_gehalt_pro_monat numeric,
+	dozent_gehalt_pro_stunde numeric,
+	dozent_gueltig_ab date,
+	dozent_gueltig_bis date,
+	dozent_id integer,
+	dozent_id_qm integer PRIMARY KEY,
+	dozent_name text,
+	dozent_stunden_fur_produktion_pro_woche numeric,
+	dozent_stunden_pro_woche numeric,
+	dozent_vertragsstatus text,
+	dozenten_sonderaufgaben_pro_woche text
+);
+
+
+--old 
  Create TABLE kc.dozenten AS
  SELECT qs_dozenteninformationen.app_item_id as dozent_id_qm,
     qs_dozenteninformationen.verbindung::json ->> 'title'::text AS dozent_name,
@@ -15,7 +34,7 @@
     --qs_dozenteninformationen.gehalt_pro_monat::numeric AS dozent_gehalt_pro_monat,
     last_event_on
    FROM podio.qs_dozenteninformationen;
-   
+  
   -- Create indices
 ALTER TABLE IF EXISTS kc.dozenten
     ADD PRIMARY KEY (dozent_id_qm);
