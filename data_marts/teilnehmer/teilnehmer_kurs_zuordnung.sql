@@ -17,6 +17,10 @@ FROM podio.tutoren_lehrgangs_details;
 -- SET keys
 ALTER TABLE tc.teilnehmer_kurs_zuordnung 
     ADD PRIMARY KEY (lehrgangs_details_id);
+	
+CREATE INDEX ON  tc.teilnehmer_kurs_zuordnung  (kurs_id_backoffice);
+CREATE INDEX ON  tc.teilnehmer_kurs_zuordnung  (teilnehmer_id_tutoren);
+CREATE INDEX ON  tc.teilnehmer_kurs_zuordnung  (tutor_id);
 
 ALTER TABLE tc.teilnehmer_kurs_zuordnung
 	ADD CONSTRAINT fk_teilnehmer

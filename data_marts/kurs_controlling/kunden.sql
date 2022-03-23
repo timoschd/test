@@ -1,4 +1,4 @@
--- create teilnehmer table in data mart. use all participants that paticipated in 2019 or later
+-- create teilnehmer table in data mart. use all participants 
 CREATE TABLE kc.kunden AS 
 SELECT app_item_id AS lead_id,
 	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
@@ -10,7 +10,7 @@ SELECT app_item_id AS lead_id,
 	bildungsgutscheinnummer,
 	sales_management_leads.account_backoffice::JSON ->> 'title'::text AS agentur_stelle,
 	(startdatum_bildungsgutschein::JSON ->> 'start_date')::date AS startdatum_bildungsgutschein,
-	((startdatum_bildungsgutschein::JSON ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int)) as enddatum_bildungsgutzschein,
+	((startdatum_bildungsgutschein::JSON ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int)) as enddatum_bildungsgutschein,
 	(sales_management_leads.status2::JSON ->> 'text'::text) as status,
 	sales_management_leads.berufsklassifikation::JSON ->> 'title'::text AS berufsklassifikation,
 	zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,

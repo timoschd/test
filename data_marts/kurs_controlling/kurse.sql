@@ -1,20 +1,13 @@
 -- Create Table kc.kurse as join from qm and backoffice
 CREATE TABLE kc.kurse AS
-WITH TEMP AS
+WITH kurse_backoffice AS
 	(SELECT app_item_id AS kurs_id, --backoffice id
- 			substring(qm_ffmt_comp, ('https://podio.com/karrieretutorde/qs/apps/qm-lehrgange/items/\d+')) AS kurs_url_qm,
+ 			substring(qm_ffmt_comp, ('(\d+)\)$'))::integer AS kurs_id_qs_qm,
 			titel AS kurs_titel,
 			status_2 AS kurs_status,
 			last_event_on AS last_event_on_backoffice
 		FROM podio.backoffice_fulfillment_components), 
-	kurse_backoffice AS
-	(SELECT kurs_id,
-			substring(kurs_url_qm, ('\d+$'))::integer AS kurs_id_qs_qm,
-			kurs_titel,
-			kurs_status,
-			last_event_on_backoffice
-		FROM TEMP), 
-	kurse_qm AS
+kurse_qm AS
 	(SELECT qs_qm_lehrgange.app_item_id AS kurs_id_qm,
 			qs_qm_lehrgange.fachgruppe::JSON ->> 'text'::text AS kurs_fachgruppe,
 			qs_qm_lehrgange.fachbereich_2 AS kurs_fachbereich,
@@ -31,6 +24,7 @@ WITH TEMP AS
 			qs_qm_lehrgange.prufungsvorbereitungszeit_gesamt::numeric AS kurs_prufungsvorbereitungszeit_pro_woche,
 			last_event_on
 		FROM podio.qs_qm_lehrgange)
+		
 	SELECT * FROM kurse_backoffice
 	LEFT JOIN kurse_qm ON kurse_backoffice.kurs_id_qs_qm = kurse_qm.kurs_id_qm; 
   

@@ -18,7 +18,7 @@ WITH teilnehmer_urls AS
 	(SELECT backoffice_fulfillment_ubersicht.app_item_id AS teilnehmer_id_backoffice,
 			backoffice_fulfillment_ubersicht.account_art_leadsflow AS abrechnung,
 			backoffice_fulfillment_ubersicht.zeiteinsatz_2 AS zeiteinsatz,
-			backoffice_fulfillment_ubersicht.betreuer_aa_ap_firma ->> 'app_item_id' AS kontakt_id_betreuer_aa,
+			(backoffice_fulfillment_ubersicht.betreuer_aa_ap_firma ->> 'app_item_id')::integer AS kontakt_id_betreuer_aa,
 			backoffice_fulfillment_ubersicht.bildungsgutscheinnummer,
 			(backoffice_fulfillment_ubersicht.startdatum_bildungsgutschein ->> 'start_date'::text)::date AS startdatum_bildungsgutschein,
 			backoffice_fulfillment_ubersicht.massnahmenbogen_2 AS massnahmenbogen,
@@ -34,20 +34,23 @@ LEFT JOIN teilnehmer_daten ON teilnehmer_ids.teilnehmer_id_boffice = teilnehmer_
 ALTER TABLE tc.teilnehmer
     ADD PRIMARY KEY (teilnehmer_id_tutoren);
 
-ALTER TABLE tc.teilnehmer -- #TODO
-	ADD CONSTRAINT fk_kontakte
-	FOREIGN KEY (kontakt_id)
-	REFERENCES tc.kontakte (kontakt_id);
+--ALTER TABLE tc.teilnehmer -- #TODO
+--	ADD CONSTRAINT fk_kontakte
+--	FOREIGN KEY (kontakt_id)
+--	REFERENCES tc.kontakte (kontakt_id)
+--	 DEFERRABLE INITIALLY DEFERRED;
 	
-ALTER TABLE tc.teilnehmer -- #TODO
+ALTER TABLE tc.teilnehmer
 	ADD CONSTRAINT fk_kontakte_berater
 	FOREIGN KEY (kontakt_id_betreuer_aa)
-	REFERENCES tc.kontakte (kontakt_id);
+	REFERENCES tc.kontakte (kontakt_id)
+	DEFERRABLE INITIALLY DEFERRED;
 
-ALTER TABLE tc.teilnehmer -- #TODO
-	ADD CONSTRAINT fk_lead
-	FOREIGN KEY (lead_id)
-	REFERENCES kc.kunden (lead_id);
+--	ALTER TABLE tc.teilnehmer -- #TODO
+--		ADD CONSTRAINT fk_lead
+--		FOREIGN KEY (lead_id)
+--		REFERENCES kc.kunden (lead_id)
+--		 DEFERRABLE INITIALLY DEFERRED;
 
 -- SET OWNER
 ALTER TABLE tc.teilnehmer OWNER TO read_only;
