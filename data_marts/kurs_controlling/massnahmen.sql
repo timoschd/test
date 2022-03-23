@@ -24,12 +24,12 @@ WITH massnahmen_sales AS
 		FROM podio.massnahmen_organisation_courses)
 SELECT *
 FROM massnahmen_sales
-LEFT JOIN massnahmen_organisation ON massnahmen_sales.massnahmen_id_sales_int = massnahmen_organisation.m_id_sales
-WHERE massnahmen_sales.massnahmen_id_sales != 'CRSE2551';
+LEFT JOIN massnahmen_organisation ON massnahmen_sales.massnahmen_id_sales_int = massnahmen_organisation.m_id_sales;
+
 		   
   -- Create primary key & not null 
 CREATE UNIQUE INDEX ON kc.massnahmen (massnahmen_id);
---CREATE UNIQUE INDEX ON kc.massnahmen (massnahmen_id_sales_int);
+CREATE UNIQUE INDEX ON kc.massnahmen (massnahmen_id_sales_int);
   
  
 ALTER TABLE IF EXISTS kc.massnahmen

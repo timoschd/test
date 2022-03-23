@@ -34,23 +34,23 @@ LEFT JOIN teilnehmer_daten ON teilnehmer_ids.teilnehmer_id_boffice = teilnehmer_
 ALTER TABLE tc.teilnehmer
     ADD PRIMARY KEY (teilnehmer_id_tutoren);
 
---ALTER TABLE tc.teilnehmer -- #TODO
---	ADD CONSTRAINT fk_kontakte
---	FOREIGN KEY (kontakt_id)
---	REFERENCES tc.kontakte (kontakt_id)
---	 DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE tc.teilnehmer -- #TODO
+	ADD CONSTRAINT fk_kontakte
+	FOREIGN KEY (kontakt_id)
+	REFERENCES tc.kontakte (kontakt_id)
+	 DEFERRABLE INITIALLY DEFERRED;
 	
 ALTER TABLE tc.teilnehmer
 	ADD CONSTRAINT fk_kontakte_berater
 	FOREIGN KEY (kontakt_id_betreuer_aa)
 	REFERENCES tc.kontakte (kontakt_id)
 	DEFERRABLE INITIALLY DEFERRED;
-
---	ALTER TABLE tc.teilnehmer -- #TODO
---		ADD CONSTRAINT fk_lead
---		FOREIGN KEY (lead_id)
---		REFERENCES kc.kunden (lead_id)
---		 DEFERRABLE INITIALLY DEFERRED;
+		
+ALTER TABLE tc.teilnehmer		
+	ADD CONSTRAINT fk_lead
+	FOREIGN KEY (lead_id)
+	REFERENCES kc.kunden (lead_id)
+	DEFERRABLE INITIALLY DEFERRED;
 
 -- SET OWNER
 ALTER TABLE tc.teilnehmer OWNER TO read_only;

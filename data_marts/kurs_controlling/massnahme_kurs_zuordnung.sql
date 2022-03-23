@@ -5,13 +5,16 @@ WITH temptable AS (
             massnahmen_organisation_courses.app_item_id_formatted AS massnahmen_id_qm,
             massnahmen_organisation_courses.titel AS massnahmen_titel,
             json_array_elements((massnahmen_organisation_courses.json_coursedetails_new::json -> 0) -> 'Komponenten'::text) AS lehrgangsdetails,
-            CONCAT('CRSE', massnahmen_organisation_courses.courses_sales_management::json ->> 'app_item_id') as massnahmen_id_sales,
+			massnahmen_organisation_courses.courses_sales_management::json ->> 'app_item_id' as massnahmen_id_sales_raw,
             last_event_on
             FROM podio.massnahmen_organisation_courses
         ), temptable_2 AS (
          SELECT temptable.app_item_id,
 			temptable.massnahmen_id_qm,
-            temptable.massnahmen_id_sales,
+            CASE WHEN LENGTH(massnahmen_id_sales_raw) > 3
+				THEN CONCAT('CRSE', massnahmen_id_sales_raw) 
+				ELSE CONCAT('CRSE0', massnahmen_id_sales_raw)
+			END as massnahmen_id_sales,
             temptable.massnahmen_titel,
             temptable.lehrgangsdetails ->> 'Titel'::text AS kurs_titel,
             (temptable.lehrgangsdetails ->> 'fmtCmpId'::text)::integer AS kurs_id,

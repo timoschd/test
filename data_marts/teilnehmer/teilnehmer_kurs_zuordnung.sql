@@ -1,4 +1,4 @@
--- CREATE TABLE for kontakte kurse zurodnung
+-- CREATE TABLE for teilnehmer kurse zurodnung
 CREATE TABLE tc.teilnehmer_kurs_zuordnung AS
 SELECT app_item_id as lehrgangs_details_id,
     (cast(json_report as json)->>'Id')::integer as teilnehmer_id_tutoren,
