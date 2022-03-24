@@ -34,7 +34,7 @@ LEFT JOIN teilnehmer_daten ON teilnehmer_ids.teilnehmer_id_boffice = teilnehmer_
 ALTER TABLE tc.teilnehmer
     ADD PRIMARY KEY (teilnehmer_id_tutoren);
 
-ALTER TABLE tc.teilnehmer -- #TODO
+ALTER TABLE tc.teilnehmer
 	ADD CONSTRAINT fk_kontakte
 	FOREIGN KEY (kontakt_id)
 	REFERENCES tc.kontakte (kontakt_id)

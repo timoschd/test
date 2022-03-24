@@ -30,7 +30,7 @@ RETURNS trigger AS
 	(SELECT backoffice_fulfillment_ubersicht.app_item_id AS teilnehmer_id_backoffice,
 			backoffice_fulfillment_ubersicht.account_art_leadsflow AS abrechnung,
 			backoffice_fulfillment_ubersicht.zeiteinsatz_2 AS zeiteinsatz,
-			backoffice_fulfillment_ubersicht.betreuer_aa_ap_firma ->> 'app_item_id' AS kontakt_id_betreuer_aa,
+			backoffice_fulfillment_ubersicht.betreuer_aa_ap_firma ->> 'app_item_id'::integer AS kontakt_id_betreuer_aa,
 			backoffice_fulfillment_ubersicht.bildungsgutscheinnummer,
 			(backoffice_fulfillment_ubersicht.startdatum_bildungsgutschein ->> 'start_date'::text)::date AS startdatum_bildungsgutschein,
 			backoffice_fulfillment_ubersicht.massnahmenbogen_2 AS massnahmenbogen,

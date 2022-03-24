@@ -47,7 +47,8 @@ SELECT id AS ticket_id,
 	gesamtreaktionszeit_in_geschäftszeiten,
 	anzahl_reaktionen,
 	ticket_handling_mode
-FROM zoho.tickets;
+FROM zoho.tickets
+WHERE substring(teilnehmer, ('\d+$'))::integer IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer);
 
 -- Set Key
 
@@ -59,10 +60,11 @@ FOREIGN KEY (lead_id_podio) REFERENCES kc.kunden (lead_id)
 DEFERRABLE INITIALLY DEFERRED;
 
 
---ALTER TABLE tc.tickets_zoho -- #TODO
--- ADD CONSTRAINT fk_teilnehmer
---FOREIGN KEY (teilnehmer_id_tutoren_podio) REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
---DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE tc.tickets_zoho -- #TODO
+ADD CONSTRAINT fk_teilnehmer
+FOREIGN KEY (teilnehmer_id_tutoren_podio)
+REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
+DEFERRABLE INITIALLY DEFERRED;
 
 -- Set Owner
 
