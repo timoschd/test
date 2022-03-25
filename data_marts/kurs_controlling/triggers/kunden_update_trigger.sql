@@ -3,7 +3,7 @@
 
 -- get entries in podio table that are newer than entries in kc table (via timestamp compare)
 
-CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer()
+CREATE OR REPLACE FUNCTION kc.upsert_kunden()
 RETURNS void AS
     $BODY$
     BEGIN
@@ -34,6 +34,7 @@ RETURNS void AS
         	calclehrgangsgebuehren AS gebuehren_gesamt,
         	last_event_on
         FROM podio.sales_management_leads
+		WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.kunden) OR lead_id NOT IN (SELECT lead_id FROM kc.kunden))
 
     ON CONFLICT (lead_id)
     DO NOTHING;
@@ -44,7 +45,7 @@ RETURNS void AS
 LANGUAGE plpgsql;
 
 -- CREATE TRIGGER FUNCTION
-CREATE OR REPLACE FUNCTION kc.upsert_massnahmen_teilnehmer()
+CREATE OR REPLACE FUNCTION kc.upsert_massnahmen_kunden()
 RETURNS void AS
     $BODY$
     BEGIN
@@ -113,12 +114,12 @@ RETURNS void AS
 LANGUAGE plpgsql;
 
 --Upsert function for teilnehmer and massnahmen_teilnehmer to fix execution order
-CREATE OR REPLACE FUNCTION kc.upsert_teilnehmer_and_massnahmen_teilnehmer()
+CREATE OR REPLACE FUNCTION kc.upsert_kunden_and_massnahmen_kunden()
 RETURNS TRIGGER AS
     $BODY$
     BEGIN
-	perform kc.upsert_teilnehmer();
-	perform kc.upsert_massnahmen_teilnehmer();
+	perform kc.upsert_kunden();
+	perform kc.upsert_massnahmen_kunden();
 
     RETURN NULL;
     END;
@@ -126,10 +127,10 @@ RETURNS TRIGGER AS
     $BODY$
 LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trig_upsert_teilnehmer_and_massnahmen_teilnehmer ON podio.sales_management_leads;
+DROP TRIGGER IF EXISTS trig_upsert_kunden_and_massnahmen_kunden ON podio.sales_management_leads;
 
 -- trigger on base podio table with function
-CREATE TRIGGER trig_upsert_teilnehmer_and_massnahmen_teilnehmer
+CREATE TRIGGER trig_upsert_kunden_and_massnahmen_kunden
     AFTER INSERT OR UPDATE ON podio.sales_management_leads
     FOR EACH STATEMENT
-    EXECUTE PROCEDURE kc.upsert_teilnehmer_and_massnahmen_teilnehmer();
+    EXECUTE PROCEDURE kc.upsert_kunden_and_massnahmen_kunden();

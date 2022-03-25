@@ -7,7 +7,7 @@ RETURNS trigger AS
 
     -- DELETE conflicts
     DELETE FROM kc.termine
-    WHERE termin_id IN (SELECT app_item_id AS termin_id FROM podio.qs_terminmanagement 
+    WHERE app_item_id IN (SELECT app_item_id AS termin_id FROM podio.qs_terminmanagement 
             WHERE last_event_on > (SELECT max(last_event_on) FROM kc.termine)
             );
     -- UPSERT of newer entries
@@ -25,10 +25,7 @@ RETURNS trigger AS
     (qs_terminmanagement.gultig_bis::json ->> 'start_date'::text)::date AS termin_gultig_bis,
     last_event_on
 FROM podio.qs_terminmanagement
-WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.termine)	OR app_item_id NOT IN (SELECT termin_id FROM kc.termine))
-
-    ON CONFLICT (termin_id) 
-    DO NOTHING;
+WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.termine)	OR app_item_id NOT IN (SELECT termin_id FROM kc.termine));
 
     RETURN NULL;
     END;
