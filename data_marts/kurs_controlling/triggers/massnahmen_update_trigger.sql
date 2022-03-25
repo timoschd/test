@@ -7,9 +7,12 @@ RETURNS trigger AS
 
     -- DELETE conflicts
     DELETE FROM kc.massnahmen
-    WHERE massnahmen_id IN (SELECT app_item_id_formatted FROM podio.massnahmen_organisation_courses  #TODO disabled trigger, no delete on primary key massnahmen_id_sales?
-            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen)
-            );
+	--delete massnahmen courses
+    WHERE massnahmen_id IN (SELECT app_item_id_formatted FROM podio.massnahmen_organisation_courses  
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen))
+			--delete sales courses
+			OR massnahmen_id_sales IN (SELECT app_item_id_formatted FROM podio.sales_management_courses  
+            WHERE last_event_on > (SELECT max(last_event_on_sales) FROM kc.massnahmen));
     -- UPSERT of newer entries
     INSERT INTO kc.massnahmen
     WITH massnahmen_sales AS
@@ -37,9 +40,11 @@ RETURNS trigger AS
         SELECT *
         FROM massnahmen_sales
         LEFT JOIN massnahmen_organisation ON massnahmen_sales.massnahmen_id_sales_int = massnahmen_organisation.m_id_sales
-            WHERE (last_event_on_sales > (SELECT max(last_event_on_sales) FROM kc.massnahmen)	OR massnahmen_id_sales NOT IN (SELECT massnahmen_id_sales FROM kc.massnahmen))
+            WHERE (last_event_on_sales > (SELECT max(last_event_on_sales) FROM kc.massnahmen))	
+				   OR (last_event_on > (SELECT max(last_event_on) FROM kc.massnahmen))
+				   OR (massnahmen_id_sales NOT IN (SELECT massnahmen_id_sales FROM kc.massnahmen))
 
-    ON CONFLICT (massnahmen_id)
+    ON CONFLICT (massnahmen_id_sales)
     DO NOTHING;
 
     END;
@@ -48,11 +53,18 @@ RETURNS trigger AS
 LANGUAGE plpgsql;
 
 -- DROP TRIGGER
-DROP TRIGGER IF EXISTS trig_upsert_massnahmen ON podio.sales_management_courses;
+DROP TRIGGER IF EXISTS trig_upsert_massnahmen_sales ON podio.sales_management_courses;
+DROP TRIGGER IF EXISTS trig_upsert_massnahmen_organisation ON podio.massnahmen_organisation_courses;
 
 -- CREATE TRIGGER for UPDATE FUNCTION
-CREATE TRIGGER trig_upsert_massnahmen
+CREATE TRIGGER trig_upsert_massnahmen_sales
     AFTER INSERT OR UPDATE ON podio.sales_management_courses
+    FOR EACH STATEMENT
+    EXECUTE PROCEDURE 
+	kc.upsert_massnahmen();
+	
+CREATE TRIGGER trig_upsert_massnahmen_organisation
+    AFTER INSERT OR UPDATE ON podio.massnahmen_organisation_courses
     FOR EACH STATEMENT
     EXECUTE PROCEDURE 
 	kc.upsert_massnahmen();
