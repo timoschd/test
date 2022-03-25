@@ -7,9 +7,12 @@ RETURNS trigger AS
 
     -- DELETE conflicts
     DELETE FROM tc.teilnehmer
+	-- delete tutoren
     WHERE teilnehmer_id_tutoren IN (SELECT app_item_id AS teilnehmer_id_tutoren FROM podio.tutoren_teilnehmer
-            WHERE last_event_on > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer)
-            );
+            WHERE last_event_on > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer))
+			-- delete backoffice
+			OR teilnehmer_id_backoffice IN (SELECT app_item_id AS teilnehmer_id_backoffice FROM podio.backoffice_fulfillment_ubersicht
+            WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM tc.teilnehmer));
     -- UPSERT of newer entries
     INSERT INTO tc.teilnehmer
     WITH teilnehmer_urls AS
@@ -41,7 +44,9 @@ RETURNS trigger AS
 SELECT 	*
 FROM teilnehmer_ids
 LEFT JOIN teilnehmer_daten ON teilnehmer_ids.teilnehmer_id_boffice = teilnehmer_daten.teilnehmer_id_backoffice
-WHERE (last_event_on_tutoren > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer)	OR teilnehmer_id_tutoren NOT IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer))
+WHERE (last_event_on_tutoren > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer))	
+	   OR (last_event_on_backoffice > (SELECT max(last_event_on_backoffice) FROM tc.teilnehmer))
+	   OR (teilnehmer_id_tutoren NOT IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer))
 
     ON CONFLICT (teilnehmer_id_tutoren) 
     DO NOTHING;
@@ -54,10 +59,17 @@ LANGUAGE plpgsql;
 
 
 -- DROP TRIGGER
-DROP TRIGGER IF EXISTS trig_upsert_teilnehmer ON podio.tutoren_teilnehmer;
+DROP TRIGGER IF EXISTS trig_upsert_teilnehmer_tutoren ON podio.tutoren_teilnehmer;
+	   
+DROP TRIGGER IF EXISTS trig_upsert_teilnehmer_backoffice ON podio.backoffice_fulfillment_ubersicht;
 
 -- CREATE TRIGGER for UPDATE FUNCTION
-CREATE TRIGGER trig_upsert_teilnehmer
+CREATE TRIGGER trig_upsert_teilnehmer_tutoren
     AFTER INSERT OR UPDATE ON podio.tutoren_teilnehmer
+    FOR EACH STATEMENT
+    EXECUTE PROCEDURE tc.upsert_teilnehmer();
+	   
+CREATE TRIGGER trig_upsert_teilnehmer_backoffice
+    AFTER INSERT OR UPDATE ON podio.backoffice_fulfillment_ubersicht
     FOR EACH STATEMENT
     EXECUTE PROCEDURE tc.upsert_teilnehmer();
