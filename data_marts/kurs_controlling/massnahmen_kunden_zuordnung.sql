@@ -5,7 +5,10 @@
 			(sales_management_leads.startdatum::json ->> 'start_date'::text)::date AS teilnehmer_startdatum,
             sales_management_leads.zeiteinsatz::json ->> 'text'::text AS teilnehmer_zeiteinsatz,
             json_array_elements(sales_management_leads.json_coursedetails::json -> 'Massnahmen'::text) AS massnahmendetails,
-            last_event_on
+            (startdatum_bildungsgutschein::JSON ->> 'start_date')::date AS f_startdatum_bgs,
+        	((startdatum_bildungsgutschein::JSON ->> 'start_date')::date + ('1 month'::interval * anzahl_monate_bgs::numeric::int)) as f_enddatum_bgs,
+	        (sales_management_leads.status2::JSON ->> 'text'::text) as f_lead_status,
+	 		last_event_on
            FROM podio.sales_management_leads
           ), 
 		temptable_2 AS (
@@ -17,7 +20,10 @@
             (temptable.massnahmendetails ->> 'Ber_Gebühr'::text)::double precision AS massnahmen_gebuhr_nach_bgs,
             round((temptable.massnahmendetails ->> 'Dauer'::text)::numeric)::integer AS massnahmen_dauer_in_wochen,
             row_number() OVER (PARTITION BY temptable.lead_id) AS massnahmen_reihenfolge,
-            temptable.last_event_on
+            temptable.f_startdatum_bgs,
+			temptable.f_enddatum_bgs,
+			temptable.f_lead_status,
+			temptable.last_event_on
            FROM temptable
            ), 
 		temptable_3 AS (
@@ -30,7 +36,10 @@
             temptable_2.massnahmen_dauer_in_wochen,
             temptable_2.massnahmen_reihenfolge,
             sum(temptable_2.massnahmen_dauer_in_wochen) OVER (PARTITION BY temptable_2.lead_id ORDER BY temptable_2.massnahmen_reihenfolge) AS massnahmen_dauer_in_wochen_cumsum,
-            temptable_2.last_event_on
+            temptable_2.f_startdatum_bgs,
+			temptable_2.f_enddatum_bgs,
+			temptable_2.f_lead_status,
+			temptable_2.last_event_on
            FROM temptable_2
            )
 		SELECT temptable_3.lead_id,
@@ -43,7 +52,10 @@
 			temptable_3.massnahmen_reihenfolge,
 			temptable_3.massnahmen_dauer_in_wochen_cumsum,
 			temptable_3.teilnehmer_startdatum + (7 * temptable_3.massnahmen_dauer_in_wochen_cumsum::integer - 7 * temptable_3.massnahmen_dauer_in_wochen) AS massnahmen_startdatum,
-            temptable_3.last_event_on
+            temptable_3.f_startdatum_bgs,
+			temptable_3.f_enddatum_bgs,
+			temptable_3.f_lead_status,
+			temptable_3.last_event_on
 		   FROM temptable_3;
 		
 -- Set indices & PRIMARY KEY
