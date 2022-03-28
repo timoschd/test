@@ -28,6 +28,8 @@ ALTER TABLE kc.buecher_kurs_zuordnung ADD PRIMARY KEY (buch_id_qm, kurs_id_qm);
 
 CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id_qm);
 CREATE INDEX ON kc.buecher_kurs_zuordnung (buch_id);
+ALTER TABLE kc.buecher_kurs_zuordnung ADD COLUMN id SERIAL;
+
 
 -- Set forgein constraints
 ALTER TABLE kc.buecher_kurs_zuordnung
