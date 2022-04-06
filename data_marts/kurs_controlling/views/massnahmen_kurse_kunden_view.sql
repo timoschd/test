@@ -1,5 +1,6 @@
 -- view for JOIN Table massnahmen_kunden & massnahmen_kurse
- WITH temptable AS (
+CREATE VIEW kc.massnahmen_kurse_kunden AS
+WITH temptable AS (
          SELECT massnahmen_kunden_zuordnung.lead_id,
             massnahmen_kunden_zuordnung.teilnehmer_startdatum,
             massnahmen_kunden_zuordnung.teilnehmer_zeiteinsatz,
@@ -53,6 +54,7 @@
     temptable_2.kurs_dauer_in_wochen,
     temptable_2.kurs_reihenfolge,
     temptable_2.kurs_dauer_in_wochen_cumsum,
-    temptable_2.last_event_on
+    temptable_2.last_event_on,
+	CONCAT(kurs_id,'/',lead_id) as kurs_lead_key
    FROM temptable
      RIGHT JOIN temptable_2 ON temptable.mids = temptable_2.massnahmen_id_sales;

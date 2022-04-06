@@ -1,4 +1,5 @@
 -- View for JOIN table teilnehmer & teilnehmer_kurs
+ CREATE VIEW tc.teilnehmer_gesamt AS
  WITH temptable AS (
          SELECT teilnehmer_kurs_zuordnung.lehrgangs_details_id,
             teilnehmer_kurs_zuordnung.teilnehmer_id_tutoren AS tidt,
@@ -40,6 +41,7 @@
     teilnehmer.massnahmenbogen,
     teilnehmer.teilnehmer_startdatum,
     teilnehmer.teilnehmer_enddatum,
-    teilnehmer.last_event_on_backoffice
+    teilnehmer.last_event_on_backoffice,
+	CONCAT(kurs_id_backoffice,'/',lead_id) as kurs_lead_key
    FROM temptable
      LEFT JOIN tc.teilnehmer ON temptable.tidt = teilnehmer.teilnehmer_id_tutoren;

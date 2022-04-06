@@ -1,20 +1,17 @@
  -- Create Table dozenten
  
- CREATE TABLE kc.dozenten_ (
-	dozent_anzahl_teilnehmer integer,
-	dozent_fachgruppe text,
-	dozent_gehalt_pro_monat numeric,
-	dozent_gehalt_pro_stunde numeric,
-	dozent_gueltig_ab date,
-	dozent_gueltig_bis date,
-	dozent_id integer,
-	dozent_id_qm integer PRIMARY KEY,
-	dozent_name text,
-	dozent_stunden_fur_produktion_pro_woche numeric,
-	dozent_stunden_pro_woche numeric,
-	dozent_vertragsstatus text,
-	dozenten_sonderaufgaben_pro_woche text
-);
+ CREATE TABLE kc.dozenten (
+	id integer,
+	name text,
+	vertragsstatus text,
+	fachbereich text,
+	mail text,
+	aktiv_ab date,
+	aktiv_bis date,
+	bearbeitet_am timestamp,
+	gehalt_fix numeric,
+	gehalt_stunde numeric,
+	stunden numeric);
 
 
 --old 
