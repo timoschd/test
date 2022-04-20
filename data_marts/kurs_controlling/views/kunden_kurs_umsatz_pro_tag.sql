@@ -21,7 +21,6 @@ SELECT 	massnahmen_kunden_zuordnung.lead_id,
 		massnahmen_kunden_zuordnung.f_lead_status as lstatus,
 		massnahme_kurs_zuordnung.kurs_id,
 		massnahme_kurs_zuordnung.kurs_titel as ktitel,
-		massnahme_kurs_zuordnung.kurs_fachbereich as kfb
 	FROM kc.massnahmen_kunden_zuordnung
 	LEFT JOIN kc.massnahme_kurs_zuordnung ON massnahmen_kunden_zuordnung.massnahmen_id_sales = massnahme_kurs_zuordnung.massnahmen_id_sales
 	),
@@ -37,7 +36,6 @@ SELECT 	kmk_ohne_duplikate.lead_id,
 		kmk_gesamt.bgs_ende,
 		kmk_gesamt.lstatus,
 		kmk_gesamt.ktitel,
-		kmk_gesamt.kfb
 	FROM kmk_ohne_duplikate
 	JOIN kmk_gesamt ON kmk_ohne_duplikate.lead_id = kmk_gesamt.lead_id AND kmk_ohne_duplikate.kurs_id = kmk_gesamt.kurs_id AND kmk_ohne_duplikate.start_datum = kmk_gesamt.mstart
 ),
@@ -77,7 +75,6 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 		(kmk_gesamt_eindeutig.mgebuehr / (COUNT(kmk_gesamt_eindeutig.kurs_id) OVER (PARTITION BY kmk_gesamt_eindeutig.lead_id, kmk_gesamt_eindeutig.mid))) as kurs_gebuehr,
 		kmk_gesamt_eindeutig.kurs_id,
 		kmk_gesamt_eindeutig.ktitel as kurs_titel,
-		kmk_gesamt_eindeutig.kfb as fachbereich,
 		teilnehmer_gesamt.kstatus as kurs_status,
 		teilnehmer_gesamt.kstart as startdatum_kurs,
 		teilnehmer_gesamt.kende as enddatum_kurs,
@@ -99,11 +96,15 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 	FROM kmk_gesamt_eindeutig
 	FULL JOIN teilnehmer_gesamt ON kmk_gesamt_eindeutig.lead_id = teilnehmer_gesamt.lead_id AND kmk_gesamt_eindeutig.kurs_id = teilnehmer_gesamt.kurs_id
 	),
+
+-- berechne abbruchtag
 all_ber_abbruchtag AS (
 SELECT 	*,
 		(min(kmk_mit_tn.calcabbruch) OVER(PARTITION BY kmk_mit_tn.lead_id)) as abbruchtag
 	FROM kmk_mit_tn
 ),
+
+--berechne zahlungsende
 all_ber_zahlungsende AS (
 SELECT 	*,
 		-- wenn calcende vor start oder calcende nach ende = tatsächliche Tage im kurs
@@ -154,7 +155,6 @@ SELECT 	all_ber_raten.lead_id,
 		all_ber_raten.startdatum_kurs,
 		all_ber_raten.calcende,
 		all_ber_raten.abbruchtag,
-		all_ber_raten.fachbereich,
 		all_ber_raten.name_dozent,
 		all_ber_raten.dozent_id,
 		all_ber_raten.tage_im_kurs,
