@@ -1,3 +1,4 @@
+DROP VIEW kc.kunden_kurs_umsatz_pro_tag;
 CREATE VIEW kc.kunden_kurs_umsatz_pro_tag AS
 -- kmk - kunden_massnahmen_kurse -> lead_id/kurs_id mit min date ohne dopplungen
 WITH kmk_ohne_duplikate AS (
@@ -49,15 +50,15 @@ SELECT	teilnehmer.lead_id,
 		teilnehmer_kurs_zuordnung.enddatum as kende,
 		teilnehmer_kurs_zuordnung.abbruch_datum as kabbruch,
 		(CASE
-		 -- 6 verschiedene fälle für falsches bzw kein abbruchdatum
+		 -- 7 verschiedene fälle für abbruch mit und ohne datum
 		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch vor LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NULL THEN (teilnehmer_kurs_zuordnung.startdatum - 1)
-		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch vor LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum > teilnehmer_kurs_zuordnung.startdatum THEN (teilnehmer_kurs_zuordnung.startdatum - 1)		
+		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch vor LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NOT NULL THEN teilnehmer_kurs_zuordnung.abbruch_datum		
 		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NULL THEN (teilnehmer_kurs_zuordnung.startdatum + 1)                                         
-		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum < teilnehmer_kurs_zuordnung.startdatum THEN (teilnehmer_kurs_zuordnung.startdatum + 1)                                         		
+		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NOT NULL THEN teilnehmer_kurs_zuordnung.abbruch_datum                                         		
 		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach aktuellem Lehrgang' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NULL THEN (teilnehmer_kurs_zuordnung.enddatum + 1)
-		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach aktuellem Lehrgang' AND teilnehmer_kurs_zuordnung.abbruch_datum < teilnehmer_kurs_zuordnung.enddatum THEN (teilnehmer_kurs_zuordnung.enddatum + 1)
-		 ELSE teilnehmer_kurs_zuordnung.enddatum
-		 END) as calcende,
+		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch nach aktuellem Lehrgang' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NOT NULL THEN teilnehmer_kurs_zuordnung.abbruch_datum
+		 WHEN teilnehmer_kurs_zuordnung.status NOT LIKE '%Abbruch%' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NOT NULL THEN teilnehmer_kurs_zuordnung.abbruch_datum
+		 END) as calcabbruch,
 		teilnehmer_kurs_zuordnung.tutor_name as ktutor,
 		teilnehmer_kurs_zuordnung.tutor_id as ktid
 	FROM tc.teilnehmer_kurs_zuordnung
@@ -73,6 +74,7 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 		kmk_gesamt_eindeutig.mid as massnahmen_id_sales,
 		kmk_gesamt_eindeutig.mtitel as massnahmen_titel,
 		kmk_gesamt_eindeutig.mgebuehr as massnahmen_gebuehr,
+		(kmk_gesamt_eindeutig.mgebuehr / (COUNT(kmk_gesamt_eindeutig.kurs_id) OVER (PARTITION BY kmk_gesamt_eindeutig.lead_id, kmk_gesamt_eindeutig.mid))) as kurs_gebuehr,
 		kmk_gesamt_eindeutig.kurs_id,
 		kmk_gesamt_eindeutig.ktitel as kurs_titel,
 		kmk_gesamt_eindeutig.kfb as fachbereich,
@@ -80,51 +82,99 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 		teilnehmer_gesamt.kstart as startdatum_kurs,
 		teilnehmer_gesamt.kende as enddatum_kurs,
 		teilnehmer_gesamt.kabbruch as abbruchdatum,
-		teilnehmer_gesamt.calcende as calc_enddatum,
-		-- wenn calcende vor start oder calcende nach ende
 		(CASE 
-		 WHEN teilnehmer_gesamt.calcende < teilnehmer_gesamt.kstart THEN 0
-		 WHEN teilnehmer_gesamt.calcende > teilnehmer_gesamt.kende THEN (teilnehmer_gesamt.kende - teilnehmer_gesamt.kstart)
-		 ELSE (teilnehmer_gesamt.calcende - teilnehmer_gesamt.kstart) 
-		 END) as tage_im_kurs,
+		 WHEN teilnehmer_gesamt.calcabbruch IS NULL
+		 THEN kmk_gesamt_eindeutig.bgs_ende
+		 ELSE teilnehmer_gesamt.calcabbruch
+		 END) as calcabbruch, 
+		 -- wenn abbruch und abbruch vor kursende dann abbruchdatum sonst kursende 
+		 (CASE
+		  WHEN teilnehmer_gesamt.calcabbruch IS NOT NULL AND teilnehmer_gesamt.calcabbruch < teilnehmer_gesamt.kende
+		  THEN teilnehmer_gesamt.calcabbruch
+		  ELSE teilnehmer_gesamt.kende
+		  END) as calcende,
+		(teilnehmer_gesamt.kende - teilnehmer_gesamt.kstart) as tage_im_kurs_geplant,
 		teilnehmer_gesamt.ktutor as name_dozent,
-		teilnehmer_gesamt.ktid as dozent_id,
-		-- wenn status irgendwas mit abbruch
-		(CASE WHEN teilnehmer_gesamt.kstatus LIKE '%Abbruch%'
-		 -- dann (wenn abbruchdate + 2 monate > bgs ende)
-		 THEN (CASE WHEN teilnehmer_gesamt.calcende + ('1 month'::interval * 2) > kmk_gesamt_eindeutig.bgs_ende
-			   -- (nimm bgs ende)
-			   THEN kmk_gesamt_eindeutig.bgs_ende
-			   -- (sonst nimm abbruchdate + 2monate)
-			   ELSE teilnehmer_gesamt.calcende + ('1 month'::interval * 2) END)
-		 -- wenn nicht abbruch dann bgs enddatum
-		 ELSE kmk_gesamt_eindeutig.bgs_ende END)::date as zahlungsende	
-		--as monatsraten,
-		--kmk_gesamt_eindeutig.mgebuehr / as rate
+		teilnehmer_gesamt.ktid as dozent_id
 	FROM kmk_gesamt_eindeutig
 	FULL JOIN teilnehmer_gesamt ON kmk_gesamt_eindeutig.lead_id = teilnehmer_gesamt.lead_id AND kmk_gesamt_eindeutig.kurs_id = teilnehmer_gesamt.kurs_id
 	),
-all_mit_raten AS (
+all_ber_abbruchtag AS (
 SELECT 	*,
-		ROUND((zahlungsende - startdatum_bgs) / 30.25) as raten,
-		(CASE WHEN ROUND((zahlungsende - startdatum_bgs) / 30.25) > 0
-		 THEN (massnahmen_gebuehr / ROUND((zahlungsende - startdatum_bgs) / 30.25))
-		 ELSE 0
-		 END) as betrag
+		(min(kmk_mit_tn.calcabbruch) OVER(PARTITION BY kmk_mit_tn.lead_id)) as abbruchtag
 	FROM kmk_mit_tn
+),
+all_ber_zahlungsende AS (
+SELECT 	*,
+		-- wenn calcende vor start oder calcende nach ende = tatsächliche Tage im kurs
+		(CASE 
+		 WHEN all_ber_abbruchtag.calcende < all_ber_abbruchtag.startdatum_kurs THEN 0
+		 WHEN (all_ber_abbruchtag.calcende > all_ber_abbruchtag.startdatum_kurs AND all_ber_abbruchtag.calcende < all_ber_abbruchtag.enddatum_kurs) THEN (all_ber_abbruchtag.calcende - all_ber_abbruchtag.startdatum_kurs)
+		 ELSE (all_ber_abbruchtag.enddatum_kurs - all_ber_abbruchtag.startdatum_kurs) 
+		 END) as tage_im_kurs,
+		--
+		-- zahlungsende bei Abbruch = calcabbruch sonst bgs ende
+		(CASE
+		 -- nur bei abbrechern (abbruch=true)
+		 WHEN all_ber_abbruchtag.abbruchtag IS NOT NULL
+		 THEN (CASE 
+ 			   -- Wenn abbruch + 2 Monate > als bgs ende
+ 			   WHEN all_ber_abbruchtag.abbruchtag + ('1 month'::interval * 2) > all_ber_abbruchtag.enddatum_bgs
+ 			   -- wenn ja dann bgs ende
+ 			   THEN all_ber_abbruchtag.enddatum_bgs
+			   ELSE all_ber_abbruchtag.abbruchtag + ('1 month'::interval * 2)
+			   END)
+		 --bei abbruch=false
+		 ELSE all_ber_abbruchtag.enddatum_bgs
+		 END)::date as zahlungsende,
+		(sum(all_ber_abbruchtag.kurs_gebuehr) OVER(PARTITION BY all_ber_abbruchtag.lead_id )) as lead_gebuehr
+	FROM all_ber_abbruchtag
+	),
+all_ber_raten AS(
+SELECT 	*,
+		ROUND((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
+		ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
+		(all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) as betrag_rate,
+		(all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) as massnahme_anteil_umsatz
+	FROM all_ber_zahlungsende
+	),
+all_ber_umsatz AS (
+SELECT 	all_ber_raten.lead_id,
+		all_ber_raten.lead_status,
+		all_ber_raten.startdatum_bgs,
+		all_ber_raten.enddatum_bgs,
+		all_ber_raten.startdatum_massnahme,
+		all_ber_raten.massnahmen_id_sales,
+		all_ber_raten.massnahmen_titel,
+		all_ber_raten.massnahmen_gebuehr,
+		all_ber_raten.massnahme_anteil_umsatz,
+		all_ber_raten.kurs_id,
+		all_ber_raten.kurs_status,
+		all_ber_raten.kurs_titel,
+		all_ber_raten.startdatum_kurs,
+		all_ber_raten.calcende,
+		all_ber_raten.abbruchtag,
+		all_ber_raten.fachbereich,
+		all_ber_raten.name_dozent,
+		all_ber_raten.dozent_id,
+		all_ber_raten.tage_im_kurs,
+		all_ber_raten.tage_im_kurs_geplant,
+		all_ber_raten.raten_geplant,
+		all_ber_raten.zahlungsende,
+		all_ber_raten.raten,
+		all_ber_raten.betrag_rate,
+		(all_ber_raten.raten * all_ber_raten.betrag_rate) as umsatz,
+		(all_ber_raten.raten_geplant * all_ber_raten.betrag_rate) as umsatz_geplant
+	FROM all_ber_raten 
 	)
 SELECT 	*,
-		(all_mit_raten.raten * all_mit_raten.betrag) as umsatz,
-		(CASE WHEN all_mit_raten.tage_im_kurs > 0
-		 THEN ((all_mit_raten.raten * all_mit_raten.betrag) / all_mit_raten.tage_im_kurs)
-		 ELSE 0
-		 END) as umsatz_pro_tag
-	FROM all_mit_raten
+		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) as umsatz_massnahme,
+		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_im_kurs_geplant as umsatz_pro_tag
+	FROM all_ber_umsatz;
 	
 -- SET OWNER TO READ_ONLY
 ALTER TABLE kc.kunden_kurs_umsatz_pro_tag
     OWNER TO read_only;
-	
-	
-	
+
+
 	
