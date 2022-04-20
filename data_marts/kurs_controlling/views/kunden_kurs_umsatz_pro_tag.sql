@@ -1,4 +1,4 @@
-DROP VIEW kc.kunden_kurs_umsatz_pro_tag;
+DROP VIEW IF EXISTS kc.kunden_kurs_umsatz_pro_tag;
 CREATE VIEW kc.kunden_kurs_umsatz_pro_tag AS
 -- kmk - kunden_massnahmen_kurse -> lead_id/kurs_id mit min date ohne dopplungen
 WITH kmk_ohne_duplikate AS (
@@ -20,7 +20,7 @@ SELECT 	massnahmen_kunden_zuordnung.lead_id,
 		massnahmen_kunden_zuordnung.f_enddatum_bgs::date as bgs_ende,
 		massnahmen_kunden_zuordnung.f_lead_status as lstatus,
 		massnahme_kurs_zuordnung.kurs_id,
-		massnahme_kurs_zuordnung.kurs_titel as ktitel,
+		massnahme_kurs_zuordnung.kurs_titel as ktitel
 	FROM kc.massnahmen_kunden_zuordnung
 	LEFT JOIN kc.massnahme_kurs_zuordnung ON massnahmen_kunden_zuordnung.massnahmen_id_sales = massnahme_kurs_zuordnung.massnahmen_id_sales
 	),
@@ -35,7 +35,7 @@ SELECT 	kmk_ohne_duplikate.lead_id,
 		kmk_gesamt.bgs_start,
 		kmk_gesamt.bgs_ende,
 		kmk_gesamt.lstatus,
-		kmk_gesamt.ktitel,
+		kmk_gesamt.ktitel
 	FROM kmk_ohne_duplikate
 	JOIN kmk_gesamt ON kmk_ohne_duplikate.lead_id = kmk_gesamt.lead_id AND kmk_ohne_duplikate.kurs_id = kmk_gesamt.kurs_id AND kmk_ohne_duplikate.start_datum = kmk_gesamt.mstart
 ),
@@ -130,13 +130,13 @@ SELECT 	*,
 		 END)::date as zahlungsende,
 		(sum(all_ber_abbruchtag.kurs_gebuehr) OVER(PARTITION BY all_ber_abbruchtag.lead_id )) as lead_gebuehr
 	FROM all_ber_abbruchtag
-	),
+),
 all_ber_raten AS(
 SELECT 	*,
 		ROUND((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
 		ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
-		(all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) as betrag_rate,
-		(all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) as massnahme_anteil_umsatz
+		(CASE WHEN (all_ber_zahlungsende.lead_gebuehr <> 0 AND (ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) <> 0) THEN (all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) ELSE 0 END) as betrag_rate,
+		(CASE WHEN (all_ber_zahlungsende.massnahmen_gebuehr <> 0 AND all_ber_zahlungsende.lead_gebuehr <> 0) THEN (all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) ELSE 0 END) as massnahme_anteil_umsatz
 	FROM all_ber_zahlungsende
 	),
 all_ber_umsatz AS (
@@ -169,7 +169,7 @@ SELECT 	all_ber_raten.lead_id,
 	)
 SELECT 	*,
 		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) as umsatz_massnahme,
-		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_im_kurs_geplant as umsatz_pro_tag
+		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_im_kurs_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_im_kurs_geplant ELSE 0 END) as umsatz_pro_tag
 	FROM all_ber_umsatz;
 	
 -- SET OWNER TO READ_ONLY
