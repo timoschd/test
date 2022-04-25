@@ -131,14 +131,17 @@ SELECT 	*,
 		(sum(all_ber_abbruchtag.kurs_gebuehr) OVER(PARTITION BY all_ber_abbruchtag.lead_id )) as lead_gebuehr
 	FROM all_ber_abbruchtag
 ),
+-- berechne raten
 all_ber_raten AS(
 SELECT 	*,
+		SUM(all_ber_zahlungsende.tage_im_kurs_geplant) OVER(PARTITION BY all_ber_zahlungsende.lead_id, all_ber_zahlungsende.massnahmen_id_sales) as tage_in_massnahme_geplant,
 		ROUND((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
 		ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
 		(CASE WHEN (all_ber_zahlungsende.lead_gebuehr <> 0 AND (ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) <> 0) THEN (all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) ELSE 0 END) as betrag_rate,
 		(CASE WHEN (all_ber_zahlungsende.massnahmen_gebuehr <> 0 AND all_ber_zahlungsende.lead_gebuehr <> 0) THEN (all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) ELSE 0 END) as massnahme_anteil_umsatz
 	FROM all_ber_zahlungsende
 	),
+-- berechne umsatz
 all_ber_umsatz AS (
 SELECT 	all_ber_raten.lead_id,
 		all_ber_raten.lead_status,
@@ -153,12 +156,14 @@ SELECT 	all_ber_raten.lead_id,
 		all_ber_raten.kurs_status,
 		all_ber_raten.kurs_titel,
 		all_ber_raten.startdatum_kurs,
+		all_ber_raten.enddatum_kurs,
 		all_ber_raten.calcende,
 		all_ber_raten.abbruchtag,
 		all_ber_raten.name_dozent,
 		all_ber_raten.dozent_id,
 		all_ber_raten.tage_im_kurs,
 		all_ber_raten.tage_im_kurs_geplant,
+		all_ber_raten.tage_in_massnahme_geplant,
 		all_ber_raten.raten_geplant,
 		all_ber_raten.zahlungsende,
 		all_ber_raten.raten,
@@ -169,7 +174,7 @@ SELECT 	all_ber_raten.lead_id,
 	)
 SELECT 	*,
 		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) as umsatz_massnahme,
-		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_im_kurs_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_im_kurs_geplant ELSE 0 END) as umsatz_pro_tag
+		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_in_massnahme_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_in_massnahme_geplant ELSE 0 END) as umsatz_pro_tag
 	FROM all_ber_umsatz;
 	
 -- SET OWNER TO READ_ONLY
