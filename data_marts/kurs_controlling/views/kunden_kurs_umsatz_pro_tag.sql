@@ -42,7 +42,15 @@ SELECT 	kmk_ohne_duplikate.lead_id,
 -- tn gesamt -> hier sind alle spalten von teilnehmer_gesamt
 teilnehmer_gesamt AS (
 SELECT	teilnehmer.lead_id,
-	 	teilnehmer_kurs_zuordnung.kurs_id_backoffice as kurs_id,
+		(CASE
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'Social Media Manager Backup' THEN 8
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'Professional Scrum Master (PSM I)  Backup' THEN 1717
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'ITIL® Foundation Backup' THEN 13
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'SAP Foundation Level Backup' THEN 34
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'Professional Scrum Master (PSM II) Backup' THEN 1718
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'Einführung Online Marketing Backup' THEN 971
+			WHEN teilnehmer_kurs_zuordnung.kurs_titel = 'Strategisches Marketingmanagement Backup' THEN 1706
+			ELSE teilnehmer_kurs_zuordnung.kurs_id_backoffice END) as kurs_id,
 		teilnehmer_kurs_zuordnung.status as kstatus,
 		teilnehmer_kurs_zuordnung.startdatum as kstart,
 		teilnehmer_kurs_zuordnung.enddatum as kende,
