@@ -47,6 +47,7 @@ SELECT	teilnehmer.lead_id,
 		teilnehmer_kurs_zuordnung.startdatum as kstart,
 		teilnehmer_kurs_zuordnung.enddatum as kende,
 		teilnehmer_kurs_zuordnung.abbruch_datum as kabbruch,
+		--gib jedem abbrecher ein datum
 		(CASE
 		 -- 7 verschiedene fälle für abbruch mit und ohne datum
 		 WHEN teilnehmer_kurs_zuordnung.status = 'Abbruch vor LG-Start' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NULL THEN (teilnehmer_kurs_zuordnung.startdatum - 1)
@@ -72,24 +73,27 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 		kmk_gesamt_eindeutig.mid as massnahmen_id_sales,
 		kmk_gesamt_eindeutig.mtitel as massnahmen_titel,
 		kmk_gesamt_eindeutig.mgebuehr as massnahmen_gebuehr,
+		--massnahmen gebühr auf kursebene runterberechen (massnahmengebühr gleichmäßig auf alle kurse)
 		(kmk_gesamt_eindeutig.mgebuehr / (COUNT(kmk_gesamt_eindeutig.kurs_id) OVER (PARTITION BY kmk_gesamt_eindeutig.lead_id, kmk_gesamt_eindeutig.mid))) as kurs_gebuehr,
 		kmk_gesamt_eindeutig.kurs_id,
 		kmk_gesamt_eindeutig.ktitel as kurs_titel,
 		teilnehmer_gesamt.kstatus as kurs_status,
 		teilnehmer_gesamt.kstart as startdatum_kurs,
 		teilnehmer_gesamt.kende as enddatum_kurs,
+		--berechne claculiertes abbruchdatum auf kursebene
 		teilnehmer_gesamt.kabbruch as abbruchdatum,
 		(CASE 
 		 WHEN teilnehmer_gesamt.calcabbruch IS NULL
 		 THEN kmk_gesamt_eindeutig.bgs_ende
 		 ELSE teilnehmer_gesamt.calcabbruch
 		 END) as calcabbruch, 
-		 -- wenn abbruch und abbruch vor kursende dann abbruchdatum sonst kursende 
+		 -- berechne das ende jeden kurses -> wenn abbruch und abbruch vor kursende dann abbruchdatum sonst kursende 
 		 (CASE
 		  WHEN teilnehmer_gesamt.calcabbruch IS NOT NULL AND teilnehmer_gesamt.calcabbruch < teilnehmer_gesamt.kende
 		  THEN teilnehmer_gesamt.calcabbruch
 		  ELSE teilnehmer_gesamt.kende
 		  END) as calcende,
+		-- tage im kurs geplant berechnen
 		(teilnehmer_gesamt.kende - teilnehmer_gesamt.kstart) as tage_im_kurs_geplant,
 		teilnehmer_gesamt.ktutor as name_dozent,
 		teilnehmer_gesamt.ktid as dozent_id
@@ -100,6 +104,7 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 -- berechne abbruchtag
 all_ber_abbruchtag AS (
 SELECT 	*,
+		-- gib den Tag an welchem der Teilnehmer abgebrochen hat auf lead ebene
 		(min(kmk_mit_tn.calcabbruch) OVER(PARTITION BY kmk_mit_tn.lead_id)) as abbruchtag
 	FROM kmk_mit_tn
 ),
@@ -107,7 +112,7 @@ SELECT 	*,
 --berechne zahlungsende
 all_ber_zahlungsende AS (
 SELECT 	*,
-		-- wenn calcende vor start oder calcende nach ende = tatsächliche Tage im kurs
+		-- berechne tage, welche der tn tatsächlich da war -> wenn calcende vor start oder calcende nach ende = tatsächliche Tage im kurs
 		(CASE 
 		 WHEN all_ber_abbruchtag.calcende < all_ber_abbruchtag.startdatum_kurs THEN 0
 		 WHEN (all_ber_abbruchtag.calcende > all_ber_abbruchtag.startdatum_kurs AND all_ber_abbruchtag.calcende < all_ber_abbruchtag.enddatum_kurs) THEN (all_ber_abbruchtag.calcende - all_ber_abbruchtag.startdatum_kurs)
@@ -128,16 +133,22 @@ SELECT 	*,
 		 --bei abbruch=false
 		 ELSE all_ber_abbruchtag.enddatum_bgs
 		 END)::date as zahlungsende,
+		 -- summiere alle massnahmengebühren (auf kursebene) auf als lead_gebühr
 		(sum(all_ber_abbruchtag.kurs_gebuehr) OVER(PARTITION BY all_ber_abbruchtag.lead_id )) as lead_gebuehr
 	FROM all_ber_abbruchtag
 ),
 -- berechne raten
 all_ber_raten AS(
 SELECT 	*,
+		-- berechne geplante tage in massnahme 
 		SUM(all_ber_zahlungsende.tage_im_kurs_geplant) OVER(PARTITION BY all_ber_zahlungsende.lead_id, all_ber_zahlungsende.massnahmen_id_sales) as tage_in_massnahme_geplant,
+		-- berechne anzahl der tatsächlichen raten
 		ROUND((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
+		--berechne anzahl der geplanten raten
 		ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
+		-- berechne höhe der raten
 		(CASE WHEN (all_ber_zahlungsende.lead_gebuehr <> 0 AND (ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) <> 0) THEN (all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) ELSE 0 END) as betrag_rate,
+		--berechne anteil des umsatzes pro massnahme
 		(CASE WHEN (all_ber_zahlungsende.massnahmen_gebuehr <> 0 AND all_ber_zahlungsende.lead_gebuehr <> 0) THEN (all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) ELSE 0 END) as massnahme_anteil_umsatz
 	FROM all_ber_zahlungsende
 	),
@@ -168,12 +179,16 @@ SELECT 	all_ber_raten.lead_id,
 		all_ber_raten.zahlungsende,
 		all_ber_raten.raten,
 		all_ber_raten.betrag_rate,
+		-- berechne den korrigierten umsatz
 		(all_ber_raten.raten * all_ber_raten.betrag_rate) as umsatz,
+		-- berechne geplanten umsatz
 		(all_ber_raten.raten_geplant * all_ber_raten.betrag_rate) as umsatz_geplant
 	FROM all_ber_raten 
 	)
 SELECT 	*,
+		-- berechne umsatz pro Massnahme (anhand verhältniss der massnahme zum umsatz)
 		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) as umsatz_massnahme,
+		-- berechne umsatz pro tag (auf massnahmen ebene)
 		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_in_massnahme_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_in_massnahme_geplant ELSE 0 END) as umsatz_pro_tag
 	FROM all_ber_umsatz;
 	
