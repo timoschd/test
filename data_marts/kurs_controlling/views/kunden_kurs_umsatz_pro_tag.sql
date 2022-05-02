@@ -67,7 +67,22 @@ SELECT	teilnehmer.lead_id,
 		 WHEN teilnehmer_kurs_zuordnung.status NOT LIKE '%Abbruch%' AND teilnehmer_kurs_zuordnung.abbruch_datum IS NOT NULL THEN teilnehmer_kurs_zuordnung.abbruch_datum
 		 END) as calcabbruch,
 		teilnehmer_kurs_zuordnung.tutor_name as ktutor,
-		teilnehmer_kurs_zuordnung.tutor_id as ktid
+	-- replace doppelte mitarbeiterids bei dozenten durch eindeutige id
+		(CASE
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7106 THEN 7393 
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7101 THEN 7453
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7100 THEN 7371
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 200 THEN 7392
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 565 THEN 7133
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7167 THEN 7376 
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 513 THEN 7223
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7093 THEN 7390
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7165 THEN 7374
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7131 THEN 7367
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7107 THEN 7377
+		WHEN teilnehmer_kurs_zuordnung.tutor_id = 7171 THEN 7176
+		WHEN teilnehmer_kurs_zuordnung.tutor_id NOT IN (7106,7101,7100,200,565,7167,513,7093,7165,7131,7107,7171) THEN teilnehmer_kurs_zuordnung.tutor_id
+		END) as ktid
 	FROM tc.teilnehmer_kurs_zuordnung
 	LEFT JOIN tc.teilnehmer ON teilnehmer_kurs_zuordnung.teilnehmer_id_tutoren = teilnehmer.teilnehmer_id_tutoren
 ),
@@ -108,13 +123,19 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 	FROM kmk_gesamt_eindeutig
 	FULL JOIN teilnehmer_gesamt ON kmk_gesamt_eindeutig.lead_id = teilnehmer_gesamt.lead_id AND kmk_gesamt_eindeutig.kurs_id = teilnehmer_gesamt.kurs_id
 	),
-
+-- join prüfungskosten zu kmk_mit_tn
+join_pk AS (
+SELECT 	kmk_mit_tn.*,
+		kurse.lehrgang_prufung_preis as gebuehren_pruefung
+	FROM kmk_mit_tn
+	LEFT JOIN kc.kurse ON kmk_mit_tn.kurs_id = kurse.kurs_id
+),
 -- berechne abbruchtag
 all_ber_abbruchtag AS (
 SELECT 	*,
 		-- gib den Tag an welchem der Teilnehmer abgebrochen hat auf lead ebene
-		(min(kmk_mit_tn.calcabbruch) OVER(PARTITION BY kmk_mit_tn.lead_id)) as abbruchtag
-	FROM kmk_mit_tn
+		(min(join_pk.calcabbruch) OVER(PARTITION BY join_pk.lead_id)) as abbruchtag
+	FROM join_pk
 ),
 
 --berechne zahlungsende
@@ -177,9 +198,10 @@ SELECT 	all_ber_raten.lead_id,
 		all_ber_raten.startdatum_kurs,
 		all_ber_raten.enddatum_kurs,
 		all_ber_raten.calcende,
-		all_ber_raten.abbruchtag,
+		(CASE WHEN all_ber_raten.abbruchtag = all_ber_raten.enddatum_bgs THEN NULL ELSE all_ber_raten.abbruchtag END) as abbruchtag,
 		all_ber_raten.name_dozent,
 		all_ber_raten.dozent_id,
+		all_ber_raten.gebuehren_pruefung,
 		all_ber_raten.tage_im_kurs,
 		all_ber_raten.tage_im_kurs_geplant,
 		all_ber_raten.tage_in_massnahme_geplant,
