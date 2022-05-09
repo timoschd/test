@@ -14,6 +14,7 @@ SELECT
 	(cast(gultig_ab as json)->>'start_date')::date as buch_gultig_ab,
 	(cast(gultig_bis as json)->>'start_date')::date as buch_gultig_bis,
 	unnest(string_to_array(qm_ffmt_cmt_ids,','::text))::integer as kurs_id_qm,
+	(fulfillment_components_id::numeric)::integer as kurs_id,
 	lizenzkosten as buch_lizenzkosten,--kein cast auf nummeric möglich -> bsp:(730,00€ zzgl. MwSt.), buch_nr: 474
 	(cast(lizenz_gultigkeit as json)->>'start_date')::date as lizenz_gueltig_ab,
 	(cast(lizenz_gultig_bis as json)->>'start_date')::date as lizenz_gueltig_bis,

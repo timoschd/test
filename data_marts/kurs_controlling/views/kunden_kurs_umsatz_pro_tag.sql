@@ -126,7 +126,9 @@ SELECT 	kmk_gesamt_eindeutig.lead_id,
 -- join prüfungskosten zu kmk_mit_tn
 join_pk AS (
 SELECT 	kmk_mit_tn.*,
-		kurse.lehrgang_prufung_preis as gebuehren_pruefung
+		kurse.lehrgang_prufung_preis as gebuehren_pruefung,
+		kurse.kurs_fachbereich,
+		kurse.kurs_fachgruppe
 	FROM kmk_mit_tn
 	LEFT JOIN kc.kurse ON kmk_mit_tn.kurs_id = kurse.kurs_id
 ),
@@ -201,6 +203,8 @@ SELECT 	all_ber_raten.lead_id,
 		(CASE WHEN all_ber_raten.abbruchtag = all_ber_raten.enddatum_bgs THEN NULL ELSE all_ber_raten.abbruchtag END) as abbruchtag,
 		all_ber_raten.name_dozent,
 		all_ber_raten.dozent_id,
+		all_ber_raten.kurs_fachgruppe,
+		all_ber_raten.kurs_fachbereich,
 		all_ber_raten.gebuehren_pruefung,
 		all_ber_raten.tage_im_kurs,
 		all_ber_raten.tage_im_kurs_geplant,
