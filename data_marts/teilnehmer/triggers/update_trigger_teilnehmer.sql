@@ -12,7 +12,9 @@ RETURNS trigger AS
             WHERE last_event_on > (SELECT max(last_event_on_tutoren) FROM tc.teilnehmer))
 			-- delete backoffice
 			OR teilnehmer_id_backoffice IN (SELECT app_item_id AS teilnehmer_id_backoffice FROM podio.backoffice_fulfillment_ubersicht
-            WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM tc.teilnehmer));
+            WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM tc.teilnehmer))
+			-- delete where last event on is leer
+			OR last_event_on_backoffice IS NULL;
     -- UPSERT of newer entries
     INSERT INTO tc.teilnehmer
     WITH teilnehmer_urls AS
