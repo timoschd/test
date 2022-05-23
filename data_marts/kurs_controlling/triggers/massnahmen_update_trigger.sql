@@ -47,6 +47,7 @@ RETURNS trigger AS
     ON CONFLICT (massnahmen_id_sales)
     DO NOTHING;
 
+	RETURN NULL;
     END;
 
     $BODY$

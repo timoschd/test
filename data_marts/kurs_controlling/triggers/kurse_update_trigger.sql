@@ -12,18 +12,20 @@ RETURNS trigger AS
             WHERE last_event_on > (SELECT max(last_event_on_backoffice) FROM kc.kurse))
 			--delete qs
 			OR kurs_id_qm IN (SELECT app_item_id FROM podio.qs_qm_lehrgange
-            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.kurse));
+            WHERE last_event_on > (SELECT max(last_event_on) FROM kc.kurse))
+			--delete where last_event_on = NULL (Backoffice Join QS WHERE QS IS LEER)
+			OR last_event_on IS NULL;
     -- UPSERT of newer entries
     INSERT INTO kc.kurse
-    WITH kurse_backoffice AS
+	WITH kurse_backoffice AS
 	(SELECT app_item_id AS kurs_id, --backoffice id
- 			substring(qm_ffmt_comp, ('(\d+)\)$'))::integer AS kurs_id_qs_qm,
 			titel AS kurs_titel,
 			status_2 AS kurs_status,
 			last_event_on AS last_event_on_backoffice
 		FROM podio.backoffice_fulfillment_components), 
-	kurse_qm AS
+kurse_qm AS
 	(SELECT qs_qm_lehrgange.app_item_id AS kurs_id_qm,
+	 		(qs_qm_lehrgange.ffmt_components_backoffice->>'app_item_id')::integer as kid,
 			qs_qm_lehrgange.fachgruppe::JSON ->> 'text'::text AS kurs_fachgruppe,
 			qs_qm_lehrgange.fachbereich_2 AS kurs_fachbereich,
 			qs_qm_lehrgange.prufung::JSON ->> 'text'::text AS kurs_prufung_art,
@@ -41,7 +43,7 @@ RETURNS trigger AS
 		FROM podio.qs_qm_lehrgange)
 		
 	SELECT * FROM kurse_backoffice
-	LEFT JOIN kurse_qm ON kurse_backoffice.kurs_id_qs_qm = kurse_qm.kurs_id_qm
+	LEFT JOIN kurse_qm ON kurse_backoffice.kurs_id = kurse_qm.kid
     WHERE (last_event_on_backoffice > (SELECT max(last_event_on_backoffice) FROM kc.kurse))	
 		   OR (last_event_on > (SELECT max(last_event_on) FROM kc.kurse))	
 		   OR (kurs_id NOT IN (SELECT kurs_id FROM kc.kurse))

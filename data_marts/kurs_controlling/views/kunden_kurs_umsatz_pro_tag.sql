@@ -1,4 +1,6 @@
+-- Lösche VIEW
 DROP VIEW IF EXISTS kc.kunden_kurs_umsatz_pro_tag;
+-- Create VIEW 
 CREATE VIEW kc.kunden_kurs_umsatz_pro_tag AS
 -- kmk - kunden_massnahmen_kurse -> lead_id/kurs_id mit min date ohne dopplungen
 WITH kmk_ohne_duplikate AS (
@@ -223,7 +225,9 @@ SELECT 	*,
 		-- berechne umsatz pro Massnahme (anhand verhältniss der massnahme zum umsatz)
 		(all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) as umsatz_massnahme,
 		-- berechne umsatz pro tag (auf massnahmen ebene)
-		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_in_massnahme_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_in_massnahme_geplant ELSE 0 END) as umsatz_pro_tag
+		(CASE WHEN(all_ber_umsatz.umsatz <> 0 AND all_ber_umsatz.tage_in_massnahme_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz) / all_ber_umsatz.tage_in_massnahme_geplant ELSE 0 END) as umsatz_pro_tag,
+		-- berechne geplanten umsatz pro Tag
+		(CASE WHEN(all_ber_umsatz.umsatz_geplant <> 0 AND all_ber_umsatz.tage_in_massnahme_geplant <> 0) THEN (all_ber_umsatz.massnahme_anteil_umsatz * all_ber_umsatz.umsatz_geplant) / all_ber_umsatz.tage_in_massnahme_geplant ELSE 0 END) as umsatz_pro_tag_geplant
 	FROM all_ber_umsatz;
 	
 -- SET OWNER TO READ_ONLY

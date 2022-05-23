@@ -63,7 +63,6 @@ UPDATE kc.dozenten SET aktiv_bis = '2022-01-30' WHERE id = 136;
 UPDATE kc.dozenten SET aktiv_bis = '2021-11-08' WHERE id = 89;
 UPDATE kc.dozenten SET aktiv_bis = '2022-02-27' WHERE id = 113;
 UPDATE kc.dozenten SET aktiv_bis = '2021-01-09' WHERE id = 109;
-UPDATE kc.dozenten SET vertragsstatus = 'Inaktiv' WHERE id IN (94,6,136,89,113,109);
 
 -- set bearbeitet am falls leer
 UPDATE kc.dozenten SET bearbeitet_am = '2022-01-01 00:00:00' WHERE bearbeitet_am IS NULL;
