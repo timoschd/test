@@ -176,11 +176,11 @@ SELECT 	*,
 		-- berechne geplante tage in massnahme 
 		SUM(all_ber_zahlungsende.tage_im_kurs_geplant) OVER(PARTITION BY all_ber_zahlungsende.lead_id, all_ber_zahlungsende.massnahmen_id_sales) as tage_in_massnahme_geplant,
 		-- berechne anzahl der tatsächlichen raten
-		ROUND((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
+		TRUNC((all_ber_zahlungsende.zahlungsende - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten,
 		--berechne anzahl der geplanten raten
-		ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
+		TRUNC((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25) as raten_geplant,
 		-- berechne höhe der raten
-		(CASE WHEN (all_ber_zahlungsende.lead_gebuehr <> 0 AND (ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) <> 0) THEN (all_ber_zahlungsende.lead_gebuehr / ROUND((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) ELSE 0 END) as betrag_rate,
+		(CASE WHEN (all_ber_zahlungsende.lead_gebuehr <> 0 AND (TRUNC((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) <> 0) THEN (all_ber_zahlungsende.lead_gebuehr / TRUNC((all_ber_zahlungsende.enddatum_bgs - all_ber_zahlungsende.startdatum_bgs) / 30.25)) ELSE 0 END) as betrag_rate,
 		--berechne anteil des umsatzes pro massnahme
 		(CASE WHEN (all_ber_zahlungsende.massnahmen_gebuehr <> 0 AND all_ber_zahlungsende.lead_gebuehr <> 0) THEN (all_ber_zahlungsende.massnahmen_gebuehr / all_ber_zahlungsende.lead_gebuehr) ELSE 0 END) as massnahme_anteil_umsatz
 	FROM all_ber_zahlungsende
