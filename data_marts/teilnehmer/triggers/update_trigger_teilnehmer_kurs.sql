@@ -26,6 +26,7 @@ RETURNS trigger AS
 	last_event_on
 FROM podio.tutoren_lehrgangs_details
 WHERE (last_event_on > (SELECT max(last_event_on) FROM tc.teilnehmer_kurs_zuordnung)	OR app_item_id NOT IN (SELECT lehrgangs_details_id FROM tc.teilnehmer_kurs_zuordnung))
+    AND (cast(json_report as json)->>'Id')::integer IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer) -- do not use entries where there is no teilnehmer in tc.teilnehmer (teilnehmer table update gets triggered before)
 
     ON CONFLICT (lehrgangs_details_id) 
     DO NOTHING;
