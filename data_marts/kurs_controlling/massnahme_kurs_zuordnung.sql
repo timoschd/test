@@ -32,6 +32,9 @@ FOREIGN KEY (kurs_id)
 REFERENCES kc.kurse (kurs_id)
 DEFERRABLE INITIALLY DEFERRED;
 
+
+
+
 -- Set table owner
 ALTER TABLE kc.massnahme_kurs_zuordnung OWNER TO read_only;
 

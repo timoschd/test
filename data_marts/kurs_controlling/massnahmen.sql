@@ -35,7 +35,10 @@ CREATE UNIQUE INDEX ON kc.massnahmen (massnahmen_id_sales_int);
 ALTER TABLE IF EXISTS kc.massnahmen
     ADD PRIMARY KEY (massnahmen_id_sales);
 	
-
+-- rules for massnahmen
+ALTER TABLE kc.massnahmen 
+ADD CONSTRAINT massnahmen_gebuehren
+CHECK (gebuehren >= 0 OR gebuehren <= 50000);
 
 -- Set table owner
 ALTER TABLE kc.massnahmen OWNER TO read_only;

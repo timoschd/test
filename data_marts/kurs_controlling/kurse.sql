@@ -34,5 +34,16 @@ ALTER TABLE IF EXISTS kc.kurse
    
 CREATE UNIQUE INDEX ON kc.kurse (kurs_id_qm);
 
+-- set rules for kurse
+ALTER TABLE kc.kurse 
+ADD CONSTRAINT kurse_kosten_prufung
+CHECK ((lehrgang_prufung_preis >= 0 AND lehrgang_prufung_preis < 3000 )OR lehrgang_prufung_preis IS null);
+
+ALTER TABLE kc.kurse 
+ADD CONSTRAINT kurse_dauer
+CHECK (kurs_dauer_in_wochen >= 0 OR kurs_dauer_in_wochen IS NULL);
+
+
+
 -- Set table owner
 ALTER TABLE kc.kurse OWNER TO read_only;

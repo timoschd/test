@@ -78,5 +78,26 @@ FOREIGN KEY (massnahmen_id_sales)
 REFERENCES kc.massnahmen (massnahmen_id_sales)
 DEFERRABLE INITIALLY DEFERRED;
 
+-- rules for massnahmen kunden
+ALTER TABLE kc.massnahmen_kunden_zuordnung 
+ADD CONSTRAINT massnahme_kunden_startdatum
+CHECK (teilnehmer_startdatum >= '2015-01-01' AND teilnehmer_startdatum <= cast(CURRENT_DATE + ('1 year'::interval * 3)as date));
+
+ALTER TABLE kc.massnahmen_kunden_zuordnung 
+ADD CONSTRAINT massnahme_gebuehr
+CHECK (massnahmen_gebuhr_nach_bgs >= 0 AND massnahmen_gebuhr_nach_bgs <= 50000);
+
+ALTER TABLE kc.massnahmen_kunden_zuordnung 
+ADD CONSTRAINT massnahme_dauer
+CHECK (massnahmen_dauer_in_wochen >= 0 AND massnahmen_dauer_in_wochen <= 162);
+
+ALTER TABLE kc.massnahmen_kunden_zuordnung 
+ADD CONSTRAINT massnahme_startdatum
+CHECK (massnahmen_startdatum >= '2015-01-01' AND massnahmen_startdatum <= cast(CURRENT_DATE + ('1 year'::interval * 3)as date));
+
+ALTER TABLE kc.massnahmen_kunden_zuordnung 
+ADD CONSTRAINT massnahme_datum_bgs
+CHECK (f_startdatum_bgs < f_enddatum_bgs);
+
 -- Set table owner
 ALTER TABLE kc.massnahmen_kunden_zuordnung OWNER TO read_only;

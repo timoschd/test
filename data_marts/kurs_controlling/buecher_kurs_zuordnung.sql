@@ -39,5 +39,15 @@ FOREIGN KEY (kurs_id_qm)
 REFERENCES kc.kurse (kurs_id_qm)
 DEFERRABLE INITIALLY DEFERRED;
 
+-- set rules for buecher
+ALTER TABLE kc.buecher_kurs_zuordnung 
+ADD CONSTRAINT buecher_jahr
+CHECK (jahr <= date_part('year', CURRENT_DATE) AND jahr >=1900);
+
+ALTER TABLE kc.buecher_kurs_zuordnung 
+ADD CONSTRAINT buecher_kosten
+CHECK (buch_kosten <= 500 AND buch_kosten >=0);
+
+
 -- Set table owner
 ALTER TABLE kc.buecher_kurs_zuordnung OWNER TO read_only;

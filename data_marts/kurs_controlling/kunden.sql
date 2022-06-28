@@ -15,13 +15,26 @@ SELECT app_item_id AS lead_id,
 	sales_management_leads.berufsklassifikation::JSON ->> 'title'::text AS berufsklassifikation,
 	zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,
 	anzahl_monate_bgs::numeric::int,
-	calclehrgangsgebuehren AS gebuehren_gesamt,
+	calclehrgangsgebuehren::numeric AS gebuehren_gesamt,
 	last_event_on
 FROM podio.sales_management_leads;
 
 -- Create indices and primary key
 CREATE INDEX ON kc.kunden (startdatum);
 ALTER TABLE kc.kunden ADD PRIMARY KEY (lead_id);
+
+-- rules for kunden
+ALTER TABLE kc.kunden 
+ADD CONSTRAINT kunden_gebuehren 
+CHECK (gebuehren_gesamt>=0 AND gebuehren_gesamt<50000); 
+
+ALTER TABLE kc.kunden 
+ADD CONSTRAINT kunden_datum_bgs 
+CHECK (startdatum_bildungsgutschein<enddatum_bildungsgutschein); 
+
+ALTER TABLE kc.kunden 
+ADD CONSTRAINT kunden_startdatum
+CHECK (startdatum > '2015-01-01' AND startdatum < cast(CURRENT_DATE + ('1 year'::interval * 3)as date)); 
 
 -- Set table owner
 ALTER TABLE kc.kunden OWNER TO read_only;

@@ -73,5 +73,29 @@ ALTER TABLE kc.dozenten ADD PRIMARY KEY (mail, aktiv_ab);
 -- add cloumn id
 ALTER TABLE kc.dozenten ADD COLUMN item_id SERIAL;
 
+-- add rules for dozenten
+ALTER TABLE kc.dozenten 
+ADD CONSTRAINT dozenten_aktiv_ab
+CHECK (aktiv_ab < cast(CURRENT_DATE + ('1 year'::interval * 1)as date) AND 
+	   aktiv_ab > '2015-01-01'); 
+
+ALTER TABLE kc.dozenten 
+ADD CONSTRAINT dozenten_zeitraum
+CHECK ((aktiv_ab <= aktiv_bis) OR aktiv_bis IS NULL);
+
+ALTER TABLE kc.dozenten 
+ADD CONSTRAINT dozenten_gehalt
+CHECK (gehalt_fix <= 12000 AND gehalt_fix >=0);
+
+ALTER TABLE kc.dozenten 
+ADD CONSTRAINT dozenten_gehalt_stunde
+CHECK (gehalt_stunde <= 150 AND gehalt_stunde >=0);
+
+ALTER TABLE kc.dozenten 
+ADD CONSTRAINT dozenten_stunden
+CHECK (stunden <= 120 AND stunden >=0);
+
+
+
 -- set owner to read_only
 ALTER TABLE kc.dozenten OWNER to read_only;
