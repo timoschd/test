@@ -34,5 +34,18 @@ ALTER TABLE tc.teilnehmer_kurs_zuordnung
 	REFERENCES kc.kurse (kurs_id)
 	DEFERRABLE INITIALLY DEFERRED;
 	
+-- rules for teilnehmer kurs zuordnung
+ALTER TABLE tc.teilnehmer_kurs_zuordnung
+ADD CONSTRAINT teilnehmer_kurs_start
+CHECK (startdatum < cast(CURRENT_DATE + ('1 year'::interval * 3) as date) AND startdatum >= '2015-01-01');,
+
+ALTER TABLE tc.teilnehmer_kurs_zuordnung
+ADD CONSTRAINT teilnehmer_kurs_ende
+CHECK (enddatum < cast(CURRENT_DATE + ('1 year'::interval * 5) as date) AND enddatum >= '2015-01-01');
+
+ALTER TABLE tc.teilnehmer_kurs_zuordnung
+ADD CONSTRAINT teilnehmer_kurs_abbruch
+CHECK (abbruch_datum < cast(CURRENT_DATE + ('1 year'::interval * 1) as date));
+
 -- SET OWNER
 ALTER TABLE tc.teilnehmer_kurs_zuordnung OWNER TO read_only;
