@@ -39,8 +39,8 @@ RETURNS trigger AS
 			backoffice_fulfillment_ubersicht.bildungsgutscheinnummer,
 			(backoffice_fulfillment_ubersicht.startdatum_bildungsgutschein ->> 'start_date'::text)::date AS startdatum_bildungsgutschein,
 			backoffice_fulfillment_ubersicht.massnahmenbogen_2 AS massnahmenbogen,
-			(backoffice_fulfillment_ubersicht.donnerstag_starttermin ->> 'start_date'::text)::date AS teilnehmer_startdatum,
-			(backoffice_fulfillment_ubersicht.end_date ->> 'start_date'::text)::date AS teilnehmer_enddatum,
+			CASE WHEN(backoffice_fulfillment_ubersicht.donnerstag_starttermin ->> 'start_date'::text)::date = '1970-01-01' THEN NULL ELSE (backoffice_fulfillment_ubersicht.donnerstag_starttermin ->> 'start_date'::text)::date END AS teilnehmer_startdatum,
+			CASE WHEN(backoffice_fulfillment_ubersicht.end_date ->> 'start_date'::text)::date = '1970-01-01' THEN NULL ELSE (backoffice_fulfillment_ubersicht.end_date ->> 'start_date'::text)::date END AS teilnehmer_enddatum,
 			backoffice_fulfillment_ubersicht.last_event_on AS last_event_on_backoffice
 		FROM podio.backoffice_fulfillment_ubersicht)
 SELECT 	*

@@ -15,8 +15,8 @@ SELECT app_item_id AS lead_id,
 	sales_management_leads.berufsklassifikation::JSON ->> 'title'::text AS berufsklassifikation,
 	zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,
 	anzahl_monate_bgs::numeric::int,
-	calclehrgangsgebuehren::numeric AS gebuehren_gesamt,
-	last_event_on
+	last_event_on,
+	calclehrgangsgebuehren::numeric AS gebuehren_gesamt
 FROM podio.sales_management_leads;
 
 -- Create indices and primary key
