@@ -33,7 +33,7 @@ RETURNS trigger AS
 			massnahmen_organisation_courses.dkz_nummer,
 			(massnahmen_organisation_courses.gultig_bis_2::JSON ->> 'start_date')::date AS gueltig_bis,
 			massnahmen_organisation_courses.calcgebuehren::numeric AS gebuehren,
-			massnahmen_organisation_courses.massnahmenbogen_item_id::integer,
+			massnahmen_organisation_courses.massnahmenbogen_item_id::bigint,
 			massnahmen_organisation_courses.massnahmenbogen_titel,
 			last_event_on
 		FROM podio.massnahmen_organisation_courses)
