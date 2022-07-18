@@ -1,14 +1,14 @@
+-- view löschen wenn vorhanden
 DROP VIEW IF EXISTS TC.TEILNEHMER_VIEW;
-
-
+-- view erstellen
 CREATE VIEW TC.TEILNEHMER_VIEW AS 
-WITH TN_ABBRUCH_KORRIGIERT AS --Temporäre Tabelle erstellen und Abbruchdatum korrigieren
-
+WITH TN_ABBRUCH_KORRIGIERT AS --Temporäre Tabelle erstellen für Abbruchdatum korrigieren
 	(SELECT TEILNEHMER_ID_TUTOREN,
 			STATUS,
 			KURS_ID_BACKOFFICE,
 			ABBRUCH_DATUM,
-			CASE
+			--verschiedene fälle für falsches abbruchdatum
+			CASEß
 							WHEN TEILNEHMER_KURS_ZUORDNUNG.STATUS = 'Abbruch vor LG-Start'::text
 												AND TEILNEHMER_KURS_ZUORDNUNG.ABBRUCH_DATUM IS NULL THEN TEILNEHMER_KURS_ZUORDNUNG.STARTDATUM - 1
 							WHEN TEILNEHMER_KURS_ZUORDNUNG.STATUS = 'Abbruch vor LG-Start'::text
@@ -26,23 +26,26 @@ WITH TN_ABBRUCH_KORRIGIERT AS --Temporäre Tabelle erstellen und Abbruchdatum ko
 							ELSE NULL::date
 			END AS CALCABBRUCH
 		FROM TC.TEILNEHMER_KURS_ZUORDNUNG), 
+-- group by tn und kleinstes abbruchdatum
 TN_MIN_ABBRUCH AS
 	(SELECT TEILNEHMER_ID_TUTOREN AS TID,
 			MIN(CALCABBRUCH) AS CALCABBRUCH
 		FROM TN_ABBRUCH_KORRIGIERT
 		GROUP BY TEILNEHMER_ID_TUTOREN),
-	TN_MAX_ABBRUCH AS (
+-- wenn abbruchdatum in einem beendeten kurs, dann abbruchdatum = ende+1 tag
+TN_MAX_ABBRUCH AS (
 SELECT TEILNEHMER_ID_TUTOREN,
 	STATUS,
 	ENDDATUM,
 	CASE 
-          WHEN CALCABBRUCH < enddatum AND status = 'Beendet' THEN enddatum + 1
-        ELSE CALCABBRUCH END as Calcabbruch
+          WHEN CALCABBRUCH < enddatum AND status = 'Beendet' THEN enddatum + 1 ELSE CALCABBRUCH END as Calcabbruch
 FROM TC.TEILNEHMER_KURS_ZUORDNUNG
 LEFT JOIN TN_MIN_ABBRUCH ON TEILNEHMER_KURS_ZUORDNUNG.TEILNEHMER_ID_TUTOREN = TN_MIN_ABBRUCH.TID),
+-- group by tn und größtes abbruchdatum
 max_abbruch as (
     SELECT teilnehmer_id_tutoren as tid, Max(calcabbruch) as CALCABBRUCH FROM tn_max_abbruch
     GROUP BY tid)
+-- select spalten von tn_kurs und join neues abbruchdatum
 SELECT LEHRGANGS_DETAILS_ID,
 	TEILNEHMER_ID_TUTOREN,
 	KURS_TITEL,
