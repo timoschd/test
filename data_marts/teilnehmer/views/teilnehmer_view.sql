@@ -38,7 +38,7 @@ SELECT TEILNEHMER_ID_TUTOREN,
 	STATUS,
 	ENDDATUM,
 	CASE 
-          WHEN CALCABBRUCH < enddatum AND status = 'Beendet' THEN enddatum + 1 ELSE CALCABBRUCH END as Calcabbruch
+          WHEN CALCABBRUCH < enddatum AND (status = 'Beendet' OR  status = 'Abbruch nach LG-Start') THEN enddatum + 1 ELSE CALCABBRUCH END as Calcabbruch
 FROM TC.TEILNEHMER_KURS_ZUORDNUNG
 LEFT JOIN TN_MIN_ABBRUCH ON TEILNEHMER_KURS_ZUORDNUNG.TEILNEHMER_ID_TUTOREN = TN_MIN_ABBRUCH.TID),
 -- group by tn und größtes abbruchdatum
