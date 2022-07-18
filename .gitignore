@@ -12,3 +12,4 @@ secrets/
 *.parquet
 *cache*/
 *.bak
+*.ini

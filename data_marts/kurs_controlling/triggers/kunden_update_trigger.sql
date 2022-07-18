@@ -31,8 +31,8 @@ RETURNS void AS
         	sales_management_leads.berufsklassifikation::JSON ->> 'title'::text AS berufsklassifikation,
         	zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,
         	anzahl_monate_bgs::numeric::int,
-        	calclehrgangsgebuehren AS gebuehren_gesamt,
-        	last_event_on
+            last_event_on,
+        	calclehrgangsgebuehren::numeric AS gebuehren_gesamt
         FROM podio.sales_management_leads
 		WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.kunden) OR app_item_id NOT IN (SELECT lead_id FROM kc.kunden))
 

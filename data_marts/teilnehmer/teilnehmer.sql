@@ -52,5 +52,16 @@ ALTER TABLE tc.teilnehmer
 	REFERENCES kc.kunden (lead_id)
 	DEFERRABLE INITIALLY DEFERRED;
 
+-- rules for teilnehmer
+ALTER TABLE tc.teilnehmer
+ADD CONSTRAINT teilnehmer_start
+CHECK (teilnehmer_startdatum < cast(CURRENT_DATE + ('1 year'::interval * 3) as date) AND teilnehmer_startdatum >= '2015-01-01');
+
+ALTER TABLE tc.teilnehmer
+ADD CONSTRAINT teilnehmer_ende
+CHECK (teilnehmer_enddatum < cast(CURRENT_DATE + ('1 year'::interval * 5) as date) AND teilnehmer_enddatum >= '2015-01-01');
+
+
+
 -- SET OWNER
 ALTER TABLE tc.teilnehmer OWNER TO read_only;

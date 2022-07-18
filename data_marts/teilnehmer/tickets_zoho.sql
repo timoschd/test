@@ -30,23 +30,23 @@ SELECT id AS ticket_id,
 	vd___unterkategorien, --kontaktdaten
  kanal,
 	kontakt_id AS kontakt_id_zoho, --zeitdaten
- 	anzahl_threads,
-	assign_time_in_hrs,
-	requester_wait_time_in_hrs,
-	first_reply_time_in_hrs,
-	ticket_age_in_days,
-	resolution_time,
-	gesamtzeitaufwand,
-	customer_response_time::timestamp,
-	ticket_abschlusszeit,
-	request_reopen_time,
-	assigned_time,
-	first_assigned_time,
-	agent_antwortzeit,
-	loesungszeit_in_geschaeftszeiten,
-	erste_reaktionszeit_in_geschaeftszeiten,
-	gesamtreaktionszeit_in_geschaeftszeiten,
-	anzahl_reaktionen,
+ 	CASE WHEN anzahl_threads = '' THEN NULL ELSE anzahl_threads::numeric END,
+	CASE WHEN assign_time_in_hrs = '' THEN NULL ELSE assign_time_in_hrs::numeric END,
+	CASE WHEN requester_wait_time_in_hrs = '' THEN NULL ELSE requester_wait_time_in_hrs::numeric END,
+	CASE WHEN first_reply_time_in_hrs = '' THEN NULL ELSE first_reply_time_in_hrs::numeric END,
+	CASE WHEN ticket_age_in_days = '' THEN NULL ELSE ticket_age_in_days::numeric END,
+	CASE WHEN resolution_time = '' THEN NULL ELSE resolution_time::numeric END,
+	CASE WHEN gesamtzeitaufwand = '' THEN NULL ELSE gesamtzeitaufwand::numeric END,
+	CASE WHEN customer_response_time = '' THEN NULL ELSE customer_response_time::timestamp END,
+	CASE WHEN ticket_abschlusszeit = '' THEN NULL ELSE ticket_abschlusszeit::timestamp END,
+	CASE WHEN request_reopen_time = '' THEN NULL ELSE request_reopen_time::timestamp END,
+	CASE WHEN assigned_time = '' THEN NULL ELSE assigned_time::timestamp END,
+	CASE WHEN first_assigned_time = '' THEN NULL ELSE first_assigned_time::timestamp END,
+	CASE WHEN agent_antwortzeit = '' THEN NULL ELSE agent_antwortzeit::timestamp END,
+	CASE WHEN loesungszeit_in_geschaeftszeiten = '' THEN NULL ELSE loesungszeit_in_geschaeftszeiten::numeric END,
+	CASE WHEN erste_reaktionszeit_in_geschaeftszeiten = '' THEN NULL ELSE erste_reaktionszeit_in_geschaeftszeiten::numeric END,
+	CASE WHEN gesamtreaktionszeit_in_geschaeftszeiten = '' THEN NULL ELSE gesamtreaktionszeit_in_geschaeftszeiten::numeric END,
+	CASE WHEN anzahl_reaktionen = '' THEN NULL ELSE anzahl_reaktionen::numeric END,
 	ticket_handling_mode
 FROM zoho.tickets
 WHERE substring(teilnehmer, ('\d+$'))::integer IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer);
@@ -66,6 +66,27 @@ ADD CONSTRAINT fk_teilnehmer
 FOREIGN KEY (teilnehmer_id_tutoren_podio)
 REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
 DEFERRABLE INITIALLY DEFERRED;
+
+--rules for tickets
+ALTER TABLE tc.tickets_zoho
+ADD CONSTRAINT tickets_zeiten
+CHECK (anzahl_threads >= 0 AND
+	assign_time_in_hrs >= 0 AND
+	requester_wait_time_in_hrs >= 0 AND
+	first_reply_time_in_hrs >= 0 AND
+	ticket_age_in_days >= 0 AND
+	resolution_time >= 0 AND
+	gesamtzeitaufwand >= 0 AND
+	(customer_response_time >= '2015-01-01' AND customer_response_time < CURRENT_DATE) AND
+	(cast(ticket_abschlusszeit as date) >= '2015-01-01' AND cast(ticket_abschlusszeit as date) < CURRENT_DATE) AND
+	(cast(request_reopen_time as date) >= '2015-01-01' AND cast(request_reopen_time as date) < CURRENT_DATE) AND
+	(cast(assigned_time as date) >= '2015-01-01' AND cast(assigned_time as date) < CURRENT_DATE) AND
+	(cast(first_assigned_time as date) >= '2015-01-01' AND cast(first_assigned_time as date) < CURRENT_DATE) AND
+	(cast(agent_antwortzeit as date) >= '2015-01-01' AND cast(agent_antwortzeit as date) < CURRENT_DATE) AND
+	loesungszeit_in_geschaeftszeiten >= 0 AND
+	erste_reaktionszeit_in_geschaeftszeiten >= 0 AND
+	gesamtreaktionszeit_in_geschaeftszeiten >= 0 AND
+	anzahl_reaktionen >= 0);
 
 -- Set Owner
 
