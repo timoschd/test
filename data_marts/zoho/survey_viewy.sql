@@ -1,33 +1,109 @@
-DROP VIEW IF EXISTS zoho.survey_view; 
-CREATE VIEW zoho.survey_view AS
-WITH fragen AS (
-SELECT 	survey_surveys.name, 
-		survey_surveys.id as s_id,
-		survey_questions.text,
-		survey_questions.type,
-		survey_questions.id as q_id
-	FROM zoho.survey_surveys
-	RIGHT JOIN zoho.survey_questions ON survey_surveys.id = cast(survey_questions.survey_id as bigint)),
-fragen_antworten AS (
-SELECT 	fragen.name,
-		fragen.s_id,
-		fragen.text,
-		fragen.type,
-		fragen.q_id,
-		coalesce(survey_responses.option, survey_responses.text) as antwort,
-		survey_responses.respondent_id
-	FROM fragen
-	RIGHT JOIN zoho.survey_responses ON fragen.q_id = cast(survey_responses.question_id as bigint))
-SELECT 	fragen_antworten.name as befragung_typ,
-		fragen_antworten.s_id::bigint as befragung_id,
-		fragen_antworten.text as frage,
-		fragen_antworten.type as fragentyp,
-		fragen_antworten.q_id::bigint as frage_id,
-		fragen_antworten.antwort,
-		fragen_antworten.respondent_id::bigint as befragten_id,
-		survey_respondents.end_date::date as datum,
-		survey_respondents.time_taken::numeric as antwortzeit
-		FROM fragen_antworten
-		LEFT JOIN zoho.survey_respondents ON fragen_antworten.respondent_id = survey_respondents.id;
+DROP VIEW IF EXISTS zoho.evaluationen;
+CREATE VIEW zoho.evaluationen AS
+-- temptables für alle nötigen tabellen mit allen benötigten spalten
+WITH questions AS (
+SELECT 	id::bigint as q_id,
+		type,
+		text,
+		page_id::bigint,
+		survey_id::bigint,
+		mandatory_enabled
+	FROM zoho.survey_questions),
+pages AS (
+SELECT 	id::bigint as p_id,
+		title,
+		survey_id::bigint
+	FROM zoho.survey_pages),
+surveys AS (
+SELECT 	id::bigint as s_id,
+		name
+	FROM zoho.survey_surveys),
+collectors AS (
+SELECT 	id::bigint as c_id,
+		name,
+		survey_id::bigint,
+		published_date::date
+	FROM zoho.survey_collectors),
+responses AS (
+SELECT 	respondent_id::bigint,
+		question_id::bigint,
+		survey_id::bigint,
+		page_id::bigint,
+		(CASE WHEN text = '' THEN NULL ELSE text END) as text,
+		(CASE WHEN option = '' THEN NULL ELSE option END) as option
+	FROM zoho.survey_responses),
+respondents AS (
+SELECT 	id::bigint as respondent_id,
+		collector_id::bigint,
+		survey_id::bigint,
+		status,
+		time_taken_in_minutes::numeric
+	FROM zoho.survey_respondents),
+-- temptables join fragen an befragung
+colectors_join_survey AS (	
+SELECT 	collectors.c_id,
+		collectors.survey_id,
+		collectors.published_date,
+		surveys.name
+	FROM collectors
+	FULL JOIN surveys ON collectors.survey_id = surveys.s_id),
+survey_join_page AS (
+SELECT 	colectors_join_survey.c_id,
+		colectors_join_survey.survey_id,
+		colectors_join_survey.published_date,
+		colectors_join_survey.name,
+		pages.p_id,
+		pages.title
+	FROM colectors_join_survey
+	FULL JOIN pages ON colectors_join_survey.survey_id = pages.survey_id),
+survey_join_questions AS (
+SELECT 	survey_join_page.c_id as collector_id,
+		survey_join_page.survey_id,
+		survey_join_page.published_date,
+		survey_join_page.name as survey_name,
+		survey_join_page.p_id as page_id,
+		survey_join_page.title as page_title,
+		questions.q_id as question_id,
+		questions.type as question_type,
+		questions.text as question,
+		mandatory_enabled as question_pflicht
+	FROM survey_join_page
+	FULL JOIN questions ON survey_join_page.survey_id = questions.survey_id AND survey_join_page.p_id = questions.page_id),
+-- join antworten
+antworten AS (
+SELECT 	responses.respondent_id,
+		responses.question_id,
+		responses.survey_id,
+		responses.page_id,
+		responses.text,
+		responses.option,
+		respondents.collector_id,
+		respondents.status,
+		respondents.time_taken_in_minutes
+	FROM responses
+	FULL JOIN respondents ON responses.respondent_id = respondents.respondent_id AND responses.survey_id = respondents.survey_id),
+-- join fragen und antworten
+fragen_join_antworten AS (
+SELECT 	survey_join_questions.collector_id,
+		survey_join_questions.survey_id,
+		survey_join_questions.published_date,
+		survey_join_questions.survey_name,
+		survey_join_questions.page_id,
+		survey_join_questions.page_title,
+		survey_join_questions.question_id,
+		survey_join_questions.question_type,
+		survey_join_questions.question,
+		survey_join_questions.question_pflicht,
+		antworten.respondent_id,
+		COALESCE(antworten.option, antworten.text) as antwort,
+		antworten.status,
+		antworten.time_taken_in_minutes
+	FROM survey_join_questions
+	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id AND survey_join_questions.page_id = antworten.page_id AND survey_join_questions.survey_id = antworten.survey_id AND survey_join_questions.collector_id = antworten.collector_id)
+-- select all from join
+SELECT * FROM fragen_join_antworten ORDER BY collector_id, survey_id, page_id, question_id;
 
-ALTER TABLE zoho.survey_view OWNER TO read_only;
+--setze owner to read_only
+ALTER TABLE zoho.evaluationen OWNER TO read_only;
+
+
