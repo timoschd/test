@@ -49,7 +49,7 @@ CHECK (abbruch_datum < cast(CURRENT_DATE + ('1 year'::interval * 1) as date) AND
 
 ALTER TABLE tc.teilnehmer_kurs_zuordnung
 ADD CONSTRAINT teilnehmer_kurs_dauer
-CHECK (startdatum <= enddatum);
+CHECK (startdatum <= enddatum OR enddatum IS NULL);
 
 -- SET OWNER
 ALTER TABLE tc.teilnehmer_kurs_zuordnung OWNER TO read_only;
