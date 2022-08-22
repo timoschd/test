@@ -6,6 +6,7 @@ ALTER TABLE zoho.survey_questions OWNER TO read_only;
 ALTER TABLE zoho.survey_respondents OWNER TO read_only;
 ALTER TABLE zoho.survey_responses OWNER TO read_only;
 
+--Delete view if exists and create new
 DROP VIEW IF EXISTS zoho.evaluationen;
 CREATE VIEW zoho.evaluationen AS
 -- temptables für alle nötigen tabellen mit allen benötigten spalten
