@@ -1,3 +1,11 @@
+-- Set OWNER to read_only
+ALTER TABLE zoho.survey_collectors OWNER TO read_only;
+ALTER TABLE zoho.survey_surveys OWNER TO read_only;
+ALTER TABLE zoho.survey_pages OWNER TO read_only;
+ALTER TABLE zoho.survey_questions OWNER TO read_only;
+ALTER TABLE zoho.survey_respondents OWNER TO read_only;
+ALTER TABLE zoho.survey_responses OWNER TO read_only;
+
 DROP VIEW IF EXISTS zoho.evaluationen;
 CREATE VIEW zoho.evaluationen AS
 -- temptables für alle nötigen tabellen mit allen benötigten spalten
@@ -21,8 +29,7 @@ SELECT 	id::bigint as s_id,
 collectors AS (
 SELECT 	id::bigint as c_id,
 		name,
-		survey_id::bigint,
-		published_date::date
+		survey_id::bigint
 	FROM zoho.survey_collectors),
 responses AS (
 SELECT 	respondent_id::bigint,
@@ -37,20 +44,19 @@ SELECT 	id::bigint as respondent_id,
 		collector_id::bigint,
 		survey_id::bigint,
 		status,
+		end_date::date as published_date,
 		time_taken_in_minutes::numeric
 	FROM zoho.survey_respondents),
 -- temptables join fragen an befragung
 colectors_join_survey AS (	
 SELECT 	collectors.c_id,
 		collectors.survey_id,
-		collectors.published_date,
 		surveys.name
 	FROM collectors
 	FULL JOIN surveys ON collectors.survey_id = surveys.s_id),
 survey_join_page AS (
 SELECT 	colectors_join_survey.c_id,
 		colectors_join_survey.survey_id,
-		colectors_join_survey.published_date,
 		colectors_join_survey.name,
 		pages.p_id,
 		pages.title
@@ -59,7 +65,6 @@ SELECT 	colectors_join_survey.c_id,
 survey_join_questions AS (
 SELECT 	survey_join_page.c_id as collector_id,
 		survey_join_page.survey_id,
-		survey_join_page.published_date,
 		survey_join_page.name as survey_name,
 		survey_join_page.p_id as page_id,
 		survey_join_page.title as page_title,
@@ -79,6 +84,7 @@ SELECT 	responses.respondent_id,
 		responses.option,
 		respondents.collector_id,
 		respondents.status,
+		respondents.published_date,
 		respondents.time_taken_in_minutes
 	FROM responses
 	FULL JOIN respondents ON responses.respondent_id = respondents.respondent_id AND responses.survey_id = respondents.survey_id),
@@ -86,7 +92,6 @@ SELECT 	responses.respondent_id,
 fragen_join_antworten AS (
 SELECT 	survey_join_questions.collector_id,
 		survey_join_questions.survey_id,
-		survey_join_questions.published_date,
 		survey_join_questions.survey_name,
 		survey_join_questions.page_id,
 		survey_join_questions.page_title,
@@ -97,6 +102,7 @@ SELECT 	survey_join_questions.collector_id,
 		antworten.respondent_id,
 		COALESCE(antworten.option, antworten.text) as antwort,
 		antworten.status,
+		antworten.published_date,
 		antworten.time_taken_in_minutes
 	FROM survey_join_questions
 	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id AND survey_join_questions.page_id = antworten.page_id AND survey_join_questions.survey_id = antworten.survey_id AND survey_join_questions.collector_id = antworten.collector_id)
