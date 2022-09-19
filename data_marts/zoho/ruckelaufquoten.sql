@@ -22,7 +22,7 @@ SELECT 	COUNT(app_item_id) as anzahl,
 		to_char((CAST(sende_datum as json)->>'start_date')::date, 'YYYY-MM') as monat,
 		CAST(json_surveydetails as json)->>'SurveyType' as typ
 	FROM podio.evaluation_survey
-	WHERE CAST(status as json)->>'text' = 'Versendet'
+	WHERE CAST(status as json)->>'text' = 'Gesendet'
 	GROUP BY monat, typ
 	ORDER BY monat DESC, typ ASC)
 --join antworten und gesendete
