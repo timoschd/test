@@ -48,7 +48,7 @@ SELECT id AS ticket_id,
 	CASE WHEN gesamtreaktionszeit_in_geschaeftszeiten = '' THEN NULL ELSE gesamtreaktionszeit_in_geschaeftszeiten::numeric END,
 	CASE WHEN anzahl_reaktionen = '' THEN NULL ELSE anzahl_reaktionen::numeric END,
 	ticket_handling_mode
-FROM zoho.tickets
+FROM zoho.desk_tickets
 WHERE substring(teilnehmer, ('\d+$'))::integer IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer);
 
 -- Set Key
