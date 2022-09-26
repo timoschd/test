@@ -104,7 +104,8 @@ SELECT 	survey_join_questions.collector_id,
 		COALESCE(antworten.option, antworten.text) as antwort,
 		antworten.status,
 		antworten.published_date,
-		antworten.time_taken_in_minutes
+		antworten.time_taken_in_minutes,
+		antworten.published_date as datum_spalte
 	FROM survey_join_questions
 	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id AND survey_join_questions.page_id = antworten.page_id AND survey_join_questions.survey_id = antworten.survey_id AND survey_join_questions.collector_id = antworten.collector_id)
 -- select all from join
