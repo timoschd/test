@@ -48,6 +48,12 @@ SELECT 	id::bigint as respondent_id,
 		end_date::date as published_date,
 		time_taken_in_minutes::numeric
 	FROM zoho.survey_respondents),
+--lehrgangs_details_id
+details_id AS (
+SELECT 	respondent_id,
+		text as details_id
+	FROM responses
+	WHERE question_id IN (64151000000988059, 64151000000738307, 64151000000730429, 64151000000739907, 64151000000741699)),
 -- temptables join fragen an befragung
 colectors_join_survey AS (	
 SELECT 	collectors.c_id,
@@ -108,8 +114,26 @@ SELECT 	survey_join_questions.collector_id,
 		antworten.published_date as datum_spalte
 	FROM survey_join_questions
 	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id AND survey_join_questions.page_id = antworten.page_id AND survey_join_questions.survey_id = antworten.survey_id AND survey_join_questions.collector_id = antworten.collector_id)
--- select all from join
-SELECT * FROM fragen_join_antworten ORDER BY collector_id, survey_id, page_id, question_id;
+-- select all from join mit lehrgangs details id
+SELECT 	fragen_join_antworten.collector_id,
+		fragen_join_antworten.survey_id,
+		fragen_join_antworten.survey_name,
+		fragen_join_antworten.page_id,
+		fragen_join_antworten.page_title,
+		fragen_join_antworten.question_id,
+		fragen_join_antworten.question_type,
+		fragen_join_antworten.question,
+		fragen_join_antworten.question_pflicht,
+		fragen_join_antworten.respondent_id,
+		fragen_join_antworten.antwort,
+		fragen_join_antworten.status,
+		fragen_join_antworten.published_date,
+		fragen_join_antworten.time_taken_in_minutes,
+		fragen_join_antworten.datum_spalte,
+		details_id.details_id
+	FROM fragen_join_antworten
+	LEFT JOIN details_id ON fragen_join_antworten.respondent_id = details_id.respondent_id
+	ORDER BY collector_id, survey_id, page_id, question_id;
 
 --setze owner to read_only
 ALTER TABLE zoho.evaluationen OWNER TO read_only;
