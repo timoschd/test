@@ -78,12 +78,12 @@ CHECK (anzahl_threads >= 0 AND
 	ticket_age_in_days >= 0 AND
 	resolution_time >= 0 AND
 	gesamtzeitaufwand >= 0 AND
-	(customer_response_time >= '2015-01-01' AND customer_response_time < CURRENT_DATE) AND
-	(cast(ticket_abschlusszeit as date) >= '2015-01-01' AND cast(ticket_abschlusszeit as date) < CURRENT_DATE) AND
-	(cast(request_reopen_time as date) >= '2015-01-01' AND cast(request_reopen_time as date) < CURRENT_DATE) AND
-	(cast(assigned_time as date) >= '2015-01-01' AND cast(assigned_time as date) < CURRENT_DATE) AND
-	(cast(first_assigned_time as date) >= '2015-01-01' AND cast(first_assigned_time as date) < CURRENT_DATE) AND
-	(cast(agent_antwortzeit as date) >= '2015-01-01' AND cast(agent_antwortzeit as date) < CURRENT_DATE) AND
+	(customer_response_time >= '2015-01-01' AND customer_response_time <= CURRENT_DATE) AND
+	(cast(ticket_abschlusszeit as date) >= '2015-01-01' AND cast(ticket_abschlusszeit as date) <= CURRENT_DATE) AND
+	(cast(request_reopen_time as date) >= '2015-01-01' AND cast(request_reopen_time as date) <= CURRENT_DATE) AND
+	(cast(assigned_time as date) >= '2015-01-01' AND cast(assigned_time as date) <= CURRENT_DATE) AND
+	(cast(first_assigned_time as date) >= '2015-01-01' AND cast(first_assigned_time as date) <= CURRENT_DATE) AND
+	(cast(agent_antwortzeit as date) >= '2015-01-01' AND cast(agent_antwortzeit as date) <= CURRENT_DATE) AND
 	loesungszeit_in_geschaeftszeiten >= 0 AND
 	erste_reaktionszeit_in_geschaeftszeiten >= 0 AND
 	gesamtreaktionszeit_in_geschaeftszeiten >= 0 AND
