@@ -3,7 +3,7 @@ CREATE TABLE kc.kunden AS
 SELECT app_item_id AS lead_id,
 	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
 	(sales_management_leads.auftragsdatum::JSON ->>'start_date')::date as auftragsdatum,
-	sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id'::text AS kontakt_id,
+	sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id'::bigint AS kontakt_id,
 	sales_management_leads.angebots_produkte::JSON ->> 'app_item_id'::text AS angbots_produkt_id,
 	kategorien::JSON ->> 'text' AS abrechnungs_kategorie,
 	(startdatum::JSON ->> 'start_date')::date AS startdatum,
@@ -22,6 +22,13 @@ FROM podio.sales_management_leads;
 -- Create indices and primary key
 CREATE INDEX ON kc.kunden (startdatum);
 ALTER TABLE kc.kunden ADD PRIMARY KEY (lead_id);
+
+
+ALTER TABLE kc.kunden -- not working as contacts get deleted
+ADD CONSTRAINT fk_kontakt
+FOREIGN KEY (kontakt_id) 
+REFERENCES tc.kontakte (kontakt_id)
+DEFERRABLE INITIALLY DEFERRED;
 
 -- rules for kunden
 ALTER TABLE kc.kunden 
