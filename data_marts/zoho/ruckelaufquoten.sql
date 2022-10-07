@@ -10,12 +10,12 @@ SELECT 	survey_respondents.id,
 		ON survey_respondents.survey_id = survey_surveys.id),
 --alle jahr/monat mit anzahl der ausgefüllten und befragungstyp
 antworten AS (
-SELECT 	COUNT(id) as ausgefuellt, 
-		name,
-		to_char(CAST(start_date as date), 'YYYY-MM') as monat 
-	FROM respondents
-	GROUP BY monat, name
-	ORDER BY monat DESC, name ASC),
+SELECT 	COUNT(DISTINCT respondent_id) as ausgefuellt, 
+		survey_name,
+		to_char(CAST(datum_spalte as date), 'YYYY-MM') as monat 
+	FROM zoho.evaluationen
+	GROUP BY monat, survey_name
+	ORDER BY monat DESC, survey_name ASC),
 --alle jahr/monat mit anzahl der gesendeten und befragungstyp
 gesendet AS (
 SELECT 	COUNT(app_item_id) as anzahl,
@@ -42,7 +42,7 @@ SELECT 	gesendet.monat as jahr_monat,
 		gesendet.anzahl as versendet
 	FROM antworten
 	RIGHT JOIN gesendet
-		ON antworten.monat = gesendet.monat AND antworten.name = gesendet.typ
+		ON antworten.monat = gesendet.monat AND antworten.survey_name = gesendet.typ
 	ORDER BY gesendet.monat DESC, typ),
 --join nächste monate dazu
 join_naechste AS (
@@ -57,7 +57,7 @@ SELECT 	join_antworten.jahr_monat,
 	FULL JOIN naechste_2
 	ON join_antworten.jahr_monat = naechste_2.monat AND join_antworten.befragungstyp = naechste_2.typ
 )
-SELECT 	COALESCE(jahr_monat, monat) as jahr_monat,
+SELECT 	CONCAT(COALESCE(jahr_monat, monat),'-28') as jahr_monat,
 		COALESCE(befragungstyp, typ) as befragungstyp,
 		ausgefuellt,
 		COALESCE(versendet, 0) as versendet,

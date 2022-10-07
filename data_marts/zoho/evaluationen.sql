@@ -1,5 +1,6 @@
 -- Set OWNER to read_only
 ALTER TABLE zoho.survey_collectors OWNER TO read_only;
+ALTER TABLE zoho.survey_fields OWNER TO read_only;
 ALTER TABLE zoho.survey_surveys OWNER TO read_only;
 ALTER TABLE zoho.survey_pages OWNER TO read_only;
 ALTER TABLE zoho.survey_questions OWNER TO read_only;
@@ -54,6 +55,21 @@ SELECT 	respondent_id,
 		text as details_id
 	FROM responses
 	WHERE question_id IN (64151000000988059, 64151000000738307, 64151000000730429, 64151000000739907, 64151000000741699)),
+-- extract vorname von respondent
+vorname AS (
+SELECT text, respondent_id, survey_id FROM zoho.survey_responses WHERE field_id::bigint = 64151000000754465 AND question_id::bigint = 64151000000754463
+),
+-- extract nachname von respondent
+nachname AS (
+SELECT text, respondent_id FROM zoho.survey_responses WHERE field_id::bigint = 64151000000754467 AND question_id::bigint = 64151000000754463
+),
+-- concat vor und nachname
+dozent AS (
+SELECT 	CONCAT(vorname.text,' ', nachname.text) as dozent_name, 
+		vorname.respondent_id,
+		vorname.survey_id
+	FROM vorname 
+	JOIN nachname ON vorname.respondent_id = nachname.respondent_id),
 -- temptables join fragen an befragung
 colectors_join_survey AS (	
 SELECT 	collectors.c_id,
@@ -113,8 +129,12 @@ SELECT 	survey_join_questions.collector_id,
 		antworten.time_taken_in_minutes,
 		antworten.published_date as datum_spalte
 	FROM survey_join_questions
-	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id AND survey_join_questions.page_id = antworten.page_id AND survey_join_questions.survey_id = antworten.survey_id AND survey_join_questions.collector_id = antworten.collector_id)
+	FULL JOIN antworten ON survey_join_questions.question_id = antworten.question_id 
+						AND survey_join_questions.page_id = antworten.page_id 
+						AND survey_join_questions.survey_id = antworten.survey_id 
+						AND survey_join_questions.collector_id = antworten.collector_id),
 -- select all from join mit lehrgangs details id
+all_join_details AS (
 SELECT 	fragen_join_antworten.collector_id,
 		fragen_join_antworten.survey_id,
 		fragen_join_antworten.survey_name,
@@ -132,7 +152,11 @@ SELECT 	fragen_join_antworten.collector_id,
 		fragen_join_antworten.datum_spalte,
 		details_id.details_id
 	FROM fragen_join_antworten
-	LEFT JOIN details_id ON fragen_join_antworten.respondent_id = details_id.respondent_id
+	LEFT JOIN details_id ON fragen_join_antworten.respondent_id = details_id.respondent_id)
+SELECT 	all_join_details.*,
+		dozent.dozent_name
+	FROM all_join_details
+	LEFT JOIN dozent ON all_join_details.respondent_id = dozent.respondent_id AND all_join_details.survey_id = dozent.survey_id
 	ORDER BY collector_id, survey_id, page_id, question_id;
 
 --setze owner to read_only
