@@ -19,7 +19,7 @@ RETURNS void AS
         SELECT app_item_id AS lead_id,
         	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
 	        (sales_management_leads.auftragsdatum::JSON ->>'start_date')::date as auftragsdatum,
-        	sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id'::bigint AS kontakt_id,
+        	(sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id')::bigint AS kontakt_id,
         	sales_management_leads.angebots_produkte::JSON ->> 'app_item_id'::text AS angbots_produkt_id,
         	kategorien::JSON ->> 'text' AS abrechnungs_kategorie,
         	(startdatum::JSON ->> 'start_date')::date AS startdatum,
