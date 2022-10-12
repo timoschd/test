@@ -24,11 +24,11 @@ CREATE INDEX ON kc.kunden (startdatum);
 ALTER TABLE kc.kunden ADD PRIMARY KEY (lead_id);
 
 
---ALTER TABLE kc.kunden -- not working as contacts get deleted
---ADD CONSTRAINT fk_kontakt
---FOREIGN KEY (kontakt_id) 
---REFERENCES tc.kontakte (kontakt_id)
---DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE kc.kunden 
+ADD CONSTRAINT fk_kontakt
+FOREIGN KEY (kontakt_id) 
+REFERENCES tc.kontakte (kontakt_id)
+DEFERRABLE INITIALLY DEFERRED;
 
 -- rules for kunden
 ALTER TABLE kc.kunden 
