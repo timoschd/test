@@ -37,7 +37,7 @@ CHECK (gebuehren_gesamt>=0 AND gebuehren_gesamt<50000);
 
 ALTER TABLE kc.kunden 
 ADD CONSTRAINT kunden_datum_bgs 
-CHECK (startdatum_bildungsgutschein<=enddatum_bildungsgutschein); 
+CHECK (startdatum_bildungsgutschein<=enddatum_bildungsgutschein OR anzahl_monate_bgs IS NULL); 
 
 ALTER TABLE kc.kunden 
 ADD CONSTRAINT kunden_startdatum
