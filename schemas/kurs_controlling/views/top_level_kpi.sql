@@ -9,8 +9,8 @@ FROM generate_series('2019-01-01'::date, CURRENT_DATE + '1 year'::interval, '1 m
 deals AS (
 SELECT 	to_Char((CAST(aufnahme_datum as json)->>'start_date')::date, 'YYYY-MM') as datum,
 		COUNT(DISTINCT app_item_id) as deals_count,
-		SUM(calclehrgangsgebuehren::numeric) as deals_sum,
-		AVG(calclehrgangsgebuehren::numeric) as deals_avg
+		ROUND(SUM(calclehrgangsgebuehren::numeric), 2) as deals_sum,
+		ROUND(AVG(calclehrgangsgebuehren::numeric), 2) as deals_avg
 	FROM podio.sales_management_leads 
 	WHERE (CAST(aufnahme_datum as json)->>'start_date')::date >= '2019-01-01'
 	GROUP BY datum
@@ -19,8 +19,8 @@ SELECT 	to_Char((CAST(aufnahme_datum as json)->>'start_date')::date, 'YYYY-MM') 
 bookings AS (
 SELECT 	to_Char((CAST(auftragsdatum as json)->>'start_date')::date, 'YYYY-MM') as datum,
 		COUNT(DISTINCT app_item_id) as bookings_count,
-		SUM(calclehrgangsgebuehren::numeric) as bookings_sum,
-		AVG(calclehrgangsgebuehren::numeric) as bookings_avg
+		ROUND(SUM(calclehrgangsgebuehren::numeric), 2) as bookings_sum,
+		ROUND(AVG(calclehrgangsgebuehren::numeric), 2) as bookings_avg
 	FROM podio.sales_management_leads 
 	WHERE (CAST(auftragsdatum as json)->>'start_date')::date >= '2019-01-01'
 		AND (status2::JSON ->> 'text'::text) != 'STORNO'
@@ -47,7 +47,7 @@ WHERE enddatum_bgs >= '2019-01-01'
 GROUP BY lead_id, betrag_rate, startdatum_bgs, zahlungsende),
 umsatz AS (
 SELECT 	to_Char(date_trunc('month', dd)::date, 'YYYY-MM') as datum,
-		SUM(betrag_rate) as umsatz_realisiert
+		ROUND(SUM(betrag_rate)::numeric, 2) as umsatz_realisiert
 FROM generate_series('2019-01-01'::date, CURRENT_DATE + '1 year'::interval, '1 month'::interval) dd
 JOIN temp_umsatz
 	ON startdatum_bgs < (date_trunc('month', dd)::date) + ('1 month'::interval)
@@ -116,9 +116,10 @@ teilnehmer AS (
 SELECT 	to_Char(date_trunc('month', dd)::date, 'YYYY-MM') as datum,
 		COUNT(DISTINCT teilnehmer_id_tutoren) as teilnehmer
 FROM generate_series('2019-01-01'::date, CURRENT_DATE + '1 year'::interval, '1 month'::interval) dd
-JOIN tc.teilnehmer_kurs_zuordnung 
+LEFT JOIN tc.teilnehmer_kurs_zuordnung 
 	ON startdatum < (date_trunc('month', dd)::date) + ('1 month'::interval)
-		AND enddatum >= date_trunc('month', dd)::date
+		AND COALESCE(abbruch_datum, enddatum) >= date_trunc('month', dd)::date
+WHERE teilnehmer_kurs_zuordnung.status IN ('Beendet', 'Abbruch nach aktuellem Lehrgang', 'Im Lehrgang', 'Prüfungswoche') 
 GROUP BY datum
 ORDER BY datum ASC),
 -- Ø Teilnehmer pro Monat
@@ -127,15 +128,16 @@ temp_tn_avg AS (
 SELECT 	date_trunc('day', dd)::date as d,
 		COUNT(DISTINCT teilnehmer_id_tutoren) as teilnehmer_avg
 FROM generate_series('2019-01-01'::date, CURRENT_DATE + '1 year'::interval, '1 day'::interval) dd
-JOIN tc.teilnehmer_kurs_zuordnung 
+LEFT JOIN tc.teilnehmer_kurs_zuordnung 
 	ON startdatum <= (date_trunc('day', dd)::date)
-		AND enddatum >= date_trunc('day', dd)::date
+		AND COALESCE(abbruch_datum, enddatum) >= date_trunc('day', dd)::date
+WHERE teilnehmer_kurs_zuordnung.status IN ('Beendet', 'Abbruch nach aktuellem Lehrgang', 'Im Lehrgang', 'Prüfungswoche')
 GROUP BY d
 ORDER BY d ASC),
 -- ## hier Øteilnehmer
 avg_teilnehmer AS (
 SELECT 	to_Char(d, 'YYYY-MM') as datum,
-		AVG(teilnehmer_avg) as teilnehmer_avg
+		ROUND(AVG(teilnehmer_avg), 2) as teilnehmer_avg
 	FROM temp_tn_avg
 	GROUP BY datum
 	ORDER BY datum ASC)
