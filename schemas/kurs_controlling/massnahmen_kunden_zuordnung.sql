@@ -67,7 +67,7 @@ CREATE INDEX ON kc.massnahmen_kunden_zuordnung (massnahmen_id_sales);
 
 -- Set FOREIGN KEY
 ALTER TABLE kc.massnahmen_kunden_zuordnung
-ADD CONSTRAINT fk_lead
+ADD CONSTRAINT fk_kunde
 FOREIGN KEY (lead_id)
 REFERENCES kc.kunden (lead_id)
 DEFERRABLE INITIALLY DEFERRED;
