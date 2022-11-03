@@ -1,8 +1,5 @@
---CREATE TABLE for tickets
-
-CREATE TABLE tc.tickets_zoho AS --ids
-
-SELECT
+-- Create Table for all Mitarbeiter tickets
+CREATE TABLE intern.tickets_mitarbeiter AS SELECT
 	id::bigint AS ticket_id,
 	request_id,
 	substring(lead, ('\d+$'))::integer AS lead_id_podio,
@@ -49,46 +46,5 @@ SELECT
 	CASE WHEN first_assigned_time = '' THEN NULL ELSE first_assigned_time::timestamp END,
 	CASE WHEN agent_antwortzeit = '' THEN NULL ELSE agent_antwortzeit::timestamp END,
 	ticket_handling_mode
-FROM zoho.desk_tickets
-WHERE quelle = 'Teilnehmer' OR teilnehmer != '';
+FROM zoho.desk_tickets WHERE quelle = 'Mitarbeiter' AND teilnehmer = '';
 
--- Set Key
-
-ALTER TABLE tc.tickets_zoho ADD PRIMARY KEY (ticket_id);
-
-
-ALTER TABLE tc.tickets_zoho ADD CONSTRAINT fk_kunden
-FOREIGN KEY (lead_id_podio) REFERENCES kc.kunden (lead_id)
-DEFERRABLE INITIALLY DEFERRED;
-
-
-ALTER TABLE tc.tickets_zoho -- #TODO
-ADD CONSTRAINT fk_teilnehmer
-FOREIGN KEY (teilnehmer_id_tutoren_podio)
-REFERENCES tc.teilnehmer (teilnehmer_id_tutoren)
-DEFERRABLE INITIALLY DEFERRED;
-
---rules for tickets
-ALTER TABLE tc.tickets_zoho
-ADD CONSTRAINT tickets_zeiten
-CHECK (anzahl_threads >= 0 AND
-	assign_time_in_hrs >= 0 AND
-	requester_wait_time_in_hrs >= 0 AND
-	first_reply_time_in_hrs >= 0 AND
-	ticket_age_in_days >= 0 AND
-	resolution_time >= 0 AND
-	gesamtzeitaufwand >= 0 AND
-	(customer_response_time >= '2015-01-01' AND customer_response_time <= CURRENT_DATE + ('1 day'::interval)) AND
-	(cast(ticket_abschlusszeit as date) >= '2015-01-01' AND cast(ticket_abschlusszeit as date) <= CURRENT_DATE + ('1 day'::interval)) AND
-	(cast(request_reopen_time as date) >= '2015-01-01' AND cast(request_reopen_time as date) <= CURRENT_DATE + ('1 day'::interval)) AND
-	(cast(assigned_time as date) >= '2015-01-01' AND cast(assigned_time as date) <= CURRENT_DATE + ('1 day'::interval)) AND
-	(cast(first_assigned_time as date) >= '2015-01-01' AND cast(first_assigned_time as date) <= CURRENT_DATE + ('1 day'::interval)) AND
-	(cast(agent_antwortzeit as date) >= '2015-01-01' AND cast(agent_antwortzeit as date) <= CURRENT_DATE + ('1 day'::interval)) AND
-	loesungszeit_in_geschaeftszeiten >= 0 AND
-	erste_reaktionszeit_in_geschaeftszeiten >= 0 AND
-	gesamtreaktionszeit_in_geschaeftszeiten >= 0 AND
-	anzahl_reaktionen >= 0);
-
--- Set Owner
-
-ALTER TABLE tc.tickets_zoho OWNER TO read_only;

@@ -61,8 +61,7 @@ RETURNS trigger AS
 	CASE WHEN agent_antwortzeit = '' THEN NULL ELSE agent_antwortzeit::timestamp END,
 	ticket_handling_mode
 FROM zoho.desk_tickets
-WHERE id NOT IN (SELECT ticket_id FROM tc.tickets_zoho) 
-	AND substring(teilnehmer, ('\d+$'))::integer IN (SELECT teilnehmer_id_tutoren FROM tc.teilnehmer)
+WHERE quelle = 'Teilnehmer' OR teilnehmer != ''
 
     ON CONFLICT (ticket_id) 
     DO NOTHING;
