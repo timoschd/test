@@ -19,6 +19,7 @@ RETURNS void AS
         SELECT app_item_id AS lead_id,
         	sales_management_leads.auftragsberechnungen::JSON ->> 'app_item_id'::text AS auftragsberechnungen_id,
 	        (sales_management_leads.auftragsdatum::JSON ->>'start_date')::date as auftragsdatum,
+            (aufnahme_datum::json ->>'start_date')::date as aufnahme_datum,
         	(sales_management_leads.kontakt_backoffice::JSON ->> 'app_item_id')::bigint AS kontakt_id,
         	sales_management_leads.angebots_produkte::JSON ->> 'app_item_id'::text AS angbots_produkt_id,
         	kategorien::JSON ->> 'text' AS abrechnungs_kategorie,
@@ -32,7 +33,8 @@ RETURNS void AS
         	zeiteinsatz::JSON ->> 'text' AS zeiteinsatz,
         	anzahl_monate_bgs::numeric::int,
             last_event_on,
-        	calclehrgangsgebuehren::numeric AS gebuehren_gesamt
+        	calclehrgangsgebuehren::numeric AS gebuehren_gesamt,
+            sales_contact::json ->> 'name' as deal_besitzer
         FROM podio.sales_management_leads
 		WHERE (last_event_on > (SELECT max(last_event_on) FROM kc.kunden) OR app_item_id NOT IN (SELECT lead_id FROM kc.kunden))
 
