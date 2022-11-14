@@ -35,6 +35,7 @@ RETURNS trigger AS
 			massnahmen_organisation_courses.calcgebuehren::numeric AS gebuehren,
 			massnahmen_organisation_courses.massnahmenbogen_item_id::bigint,
 			massnahmen_organisation_courses.massnahmenbogen_titel,
+			substring(verbindung::json ->> 'title', '(?<= - )(karriere.*|academy.*)$') as massnahmenzertifikat,
 			last_event_on
 		FROM podio.massnahmen_organisation_courses)
         SELECT *

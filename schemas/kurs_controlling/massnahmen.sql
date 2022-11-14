@@ -1,4 +1,6 @@
- -- Create Table massnahmen
+drop table kc.massnahmen cascade;
+
+-- Create Table massnahmen
 Create TABLE kc.massnahmen AS
 WITH massnahmen_sales AS
 	(SELECT app_item_id AS massnahmen_id_sales_int, -- id ohne CRSE
@@ -18,8 +20,9 @@ WITH massnahmen_sales AS
 			massnahmen_organisation_courses.dkz_nummer,
 			(massnahmen_organisation_courses.gultig_bis_2::JSON ->> 'start_date')::date AS gueltig_bis,
 			massnahmen_organisation_courses.calcgebuehren::numeric AS gebuehren,
-			massnahmen_organisation_courses.massnahmenbogen_item_id::integer,
+			massnahmen_organisation_courses.massnahmenbogen_item_id::numeric,
 			massnahmen_organisation_courses.massnahmenbogen_titel,
+			substring(verbindung::json ->> 'title', '(?<= - )(karriere.*|academy.*)$') as massnahmenzertifikat,
 			last_event_on
 		FROM podio.massnahmen_organisation_courses)
 SELECT *
