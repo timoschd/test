@@ -1,4 +1,4 @@
-DROP VIEW sc.current_closings;
+DROP VIEW IF EXISTS sc.current_closings;
 
 -- get closings and deal revenue per current day, week, month and dealowner and join image url to dealowner headshot  
 CREATE VIEW sc.current_closings AS (  
@@ -41,6 +41,7 @@ sales_images AS (
   "Full Name" as name_emp,
   headshot_image_url
   FROM zoho."Users"
+  WHERE headshot_image_url IS NOT NULL
  )
 
 
