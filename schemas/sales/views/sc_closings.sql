@@ -17,18 +17,14 @@ CREATE VIEW sc.closings AS (
 			ELSE "Deals"."Art der Maßnahme"::text END as art_der_massnahme,
 		NULL::text as lead_besitzer,
 		"Deals"."Owner Name"::text as deal_besitzer,
-		"Deals"."Betrag 1"::numeric as betrag,
+		"Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric as betrag,
 		"Deals"."Auftragsdatum"::date - "Deals"."Aufnahme Datum"::date as closing_dauer,
 		NULL::boolean as deal_geclosed,
 		'Closing' as typ,
 		-- calc first day of week (from aufnahme datum)
-		cast("Deals"."Auftragsdatum" as date) 
-			- cast(date_Part('isodow', cast("Deals"."Auftragsdatum" as date)) as integer) 
-			+ 1 as weekstart,
-		date_part('day', cast("Deals"."Auftragsdatum" as date)) as tag,
-		date_part('isoweek', cast("Deals"."Auftragsdatum" as date)) as woche,
-		date_part('month', cast("Deals"."Auftragsdatum" as date)) as monat,
-		date_part('isoyear', cast("Deals"."Auftragsdatum" as date)) as jahr
+		date_trunc('week', "Deals"."Auftragsdatum") as weekstart,
+		to_Char("Deals"."Auftragsdatum"::date, 'IYYY-IW') as woche,
+		to_char("Deals"."Auftragsdatum"::date, 'IYYY-MM') as monat
 	FROM zoho."Deals"
 	WHERE "Deals"."Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen'));
 -- set owner

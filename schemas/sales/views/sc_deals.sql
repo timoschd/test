@@ -17,7 +17,7 @@ CREATE VIEW sc.deals AS (
 			ELSE "Deals"."Art der Maßnahme"::text END as art_der_massnahme,
 		NULL::text as lead_besitzer,
 		"Deals"."Owner Name"::text as deal_besitzer,
-		"Deals"."Betrag 1"::numeric as betrag,
+		("Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric) as betrag,
 		"Deals"."Auftragsdatum"::date - "Deals"."Aufnahme Datum"::date as closing_dauer,
 		-- calc boolean for deal closed
 		CASE 
@@ -26,13 +26,9 @@ CREATE VIEW sc.deals AS (
 			THEN 'True'::boolean ELSE 'False'::boolean END as deal_geclosed,
 		'Deal' as typ,
 		-- calc first day of week (from aufnahme datum)
-		cast("Deals"."Aufnahme Datum" as date) 
-			- cast(date_Part('isodow', cast("Deals"."Aufnahme Datum" as date)) as integer) 
-			+ 1 as weekstart,
-		date_part('day', cast("Deals"."Aufnahme Datum" as date)) as tag,
-		date_part('isoweek', cast("Deals"."Aufnahme Datum" as date)) as woche,
-		date_part('month', cast("Deals"."Aufnahme Datum" as date)) as monat,
-		date_part('isoyear', cast("Deals"."Aufnahme Datum" as date)) as jahr
+		date_trunc('week', "Deals"."Aufnahme Datum"::date) as weekstart,
+		to_Char("Deals"."Aufnahme Datum"::date, 'IYYY-IW') as woche,
+		to_Char("Deals"."Aufnahme Datum"::date, 'IYYY-MM') as monat
 	FROM zoho."Deals");
 -- set owner
 ALTER TABLE sc.deals OWNER TO read_only;

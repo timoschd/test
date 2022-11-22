@@ -15,13 +15,9 @@ CREATE VIEW sc.leads AS (
 		NULL::boolean as deal_geclosed,
 		'Lead' as typ,
 		-- calc first day of week (from created time)
-		cast("Leads"."Created Time" as date) 
-			- cast(date_Part('isodow', cast("Leads"."Created Time" as date)) as integer) 
-			+ 1 as weekstart,
-		date_part('day', cast("Leads"."Created Time" as date)) as tag,
-		date_part('isoweek', cast("Leads"."Created Time" as date)) as woche,
-		date_part('month', cast("Leads"."Created Time" as date)) as monat,
-		date_part('isoyear', cast("Leads"."Created Time" as date)) as jahr
+		date_trunc('week', "Leads"."Created Time"::date) as weekstart,
+		to_char("Leads"."Created Time"::date, 'IYYY-IW') as woche,
+		to_char("Leads"."Created Time"::date, 'IYYY-MM') as monat
 	FROM zoho."Leads");
 -- set owner 
 ALTER TABLE sc.leads OWNER TO read_only;
