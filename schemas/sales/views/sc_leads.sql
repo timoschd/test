@@ -6,6 +6,7 @@ CREATE VIEW sc.leads AS (
 		"Leads"."Id"::bigint,
 		"Leads"."Lead Status"::text as lead_status,
 		NULL::text as deal_stufe,
+		"Leads"."Probability (%)"::integer as deal_stage,
 		"Leads"."Created Time"::date as datum,
 		"Leads"."Art der Maßnahme"::text as art_der_massnahme,
 		"Leads"."Owner Name"::text as lead_besitzer,

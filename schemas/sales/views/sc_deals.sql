@@ -6,6 +6,7 @@ CREATE VIEW sc.deals AS (
 		"Deals"."Id"::bigint,
 		NULL::text as lead_status,
 		"Deals"."Stage"::text as deal_stufe,
+		"Deals"."Probability (%)"::integer as deal_stage,
 		"Deals"."Aufnahme Datum"::date as datum,
 		CASE
 			WHEN ("Deals"."Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Deals"."Art der Maßnahme"::text IS NULL)
