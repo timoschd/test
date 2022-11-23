@@ -19,6 +19,7 @@ CREATE VIEW sc.closings AS (
 		NULL::text as lead_besitzer,
 		"Deals"."Owner Name"::text as deal_besitzer,
 		"Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric as betrag,
+		NULL::boolean as sieben_tage_stage,
 		"Deals"."Auftragsdatum"::date - "Deals"."Aufnahme Datum"::date as closing_dauer,
 		NULL::boolean as deal_geclosed,
 		'Closing' as typ,

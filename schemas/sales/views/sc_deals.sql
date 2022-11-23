@@ -19,12 +19,17 @@ CREATE VIEW sc.deals AS (
 		NULL::text as lead_besitzer,
 		"Deals"."Owner Name"::text as deal_besitzer,
 		("Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric) as betrag,
+		CASE 
+			WHEN "Deals"."Probability (%)" = 75
+			AND (CURRENT_DATE - "Deals"."Aufnahme Datum"::date) >= 7
+			THEN TRUE::boolean
+			ELSE FALSE::boolean END as sieben_tage_stage,
 		"Deals"."Auftragsdatum"::date - "Deals"."Aufnahme Datum"::date as closing_dauer,
 		-- calc boolean for deal closed
 		CASE 
-			WHEN "Deals"."Auftragsdatum"::date IS NULL 
+			WHEN "Deals"."Auftragsdatum"::date IS NOT NULL 
 			AND "Deals"."Stage"::text IN ('Abgeschlossen','Abgeschlossen, gewonnen')
-			THEN 'True'::boolean ELSE 'False'::boolean END as deal_geclosed,
+			THEN TRUE::boolean ELSE FALSE::boolean END as deal_geclosed,
 		'Deal' as typ,
 		-- calc first day of week (from aufnahme datum)
 		date_trunc('week', "Deals"."Aufnahme Datum"::date) as weekstart,
