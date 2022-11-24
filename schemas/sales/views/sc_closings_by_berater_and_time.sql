@@ -53,7 +53,7 @@ SELECT 	"Owner Name"::text as berater,
 	FROM zoho."Deals"
 	WHERE date_trunc('month', "Closing Date") = date_trunc('month', CURRENT_DATE)
 		AND "Probability (%)" = 75
-		GROUP BY berater
+	GROUP BY berater
 ),
 -- all berater (unique)
 berater AS (
