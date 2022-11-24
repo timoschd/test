@@ -21,7 +21,7 @@ CREATE VIEW sc.deals AS (
 		"Owner Name"::text as deal_besitzer,
 		("Betrag 1"::numeric + "Betrag 2"::numeric) as betrag,
 		CASE 
-			WHEN (CURRENT_DATE - "Aufnahme Datum"::date) >= 7
+			WHEN (CURRENT_DATE - COALESCE("Aufnahme Datum"::date, "Created Time"::date)) >= 7
 			THEN TRUE::boolean
 			ELSE FALSE::boolean END as aufnahme_older_7_days,
 		"Auftragsdatum"::date - "Aufnahme Datum"::date as closing_dauer,
@@ -32,10 +32,10 @@ CREATE VIEW sc.deals AS (
 			THEN TRUE::boolean ELSE FALSE::boolean END as deal_geclosed,
 		'Deal' as typ,
 		-- calc first day of week (from aufnahme datum)
-		date_trunc('week', "Aufnahme Datum"::date) as weekstart,
-		to_Char("Aufnahme Datum"::date, 'IYYY-IW') as woche,
-		to_Char("Aufnahme Datum"::date, 'IYYY-MM') as monat
+		date_trunc('week', COALESCE("Aufnahme Datum"::date, "Created Time"::date)) as weekstart,
+		to_Char(COALESCE("Aufnahme Datum"::date, "Created Time"::date), 'IYYY-IW') as woche,
+		to_Char(COALESCE("Aufnahme Datum"::date, "Created Time"::date), 'IYYY-MM') as monat
 	FROM zoho."Deals");
-	
+
 -- set owner
 ALTER TABLE sc.deals OWNER TO read_only;
