@@ -1,21 +1,22 @@
 -- delte view if exists
 DROP VIEW IF EXISTS sc.closings_by_day_and_berater;
+
 -- create view
 CREATE VIEW sc.closings_by_day_and_berater AS 
 with closings AS (
-SELECT	"Deals"."Owner Name"::text as berater,
-        "Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric as wert,
-		"Deals"."Auftragsdatum"::date as datum,
+SELECT	"Owner Name"::text as berater,
+        "Betrag 1"::numeric + "Betrag 2"::numeric as wert,
+		"Auftragsdatum"::date as datum,
 		CASE
-			WHEN ("Deals"."Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Deals"."Art der Maßnahme"::text IS NULL)
-			AND "Deals"."Auftragsdatum"::date< '2022-10-01'
-			AND "Deals"."Betrag 1"::numeric >= 33000 THEN 'Umschulung'
-			WHEN ("Deals"."Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Deals"."Art der Maßnahme"::text IS NULL)
-			AND "Deals"."Auftragsdatum"::date < '2022-10-01'
-			AND "Deals"."Betrag 1"::numeric < 33000 THEN 'Weiterbildung'
-			ELSE "Deals"."Art der Maßnahme"::text END as art
+			WHEN ("Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Art der Maßnahme"::text IS NULL)
+			AND "Auftragsdatum"::date< '2022-10-01'
+			AND "Betrag 1"::numeric >= 33000 THEN 'Umschulung'
+			WHEN ("Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Art der Maßnahme"::text IS NULL)
+			AND "Auftragsdatum"::date < '2022-10-01'
+			AND "Betrag 1"::numeric < 33000 THEN 'Weiterbildung'
+			ELSE "Art der Maßnahme"::text END as art
 FROM zoho."Deals"
-WHERE "Deals"."Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen')),
+WHERE "Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen')),
 
 split_wert AS (
 SELECT	berater,
@@ -41,5 +42,6 @@ SELECT 	berater,
 		SUM(X) as wert_unbekannt
 FROM split_wert
 GROUP BY berater, datum;
+
 -- set owner
 ALTER TABLE sc.closings_by_day_and_berater OWNER to read_only;

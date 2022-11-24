@@ -11,7 +11,7 @@ with closings_day AS (
     SUM(SUM("Betrag 1"::numeric) + SUM("Betrag 2"::numeric)) OVER(PARTITION BY "Owner Name") as betrag_heute_summe_besitzer,  -- calc total sum per employee 
     "Auftragsdatum" As datum_heute
    FROM zoho."Deals"
-   WHERE "Auftragsdatum" = CURRENT_DATE and "Stage" = 'Abgeschlossen'
+   WHERE "Auftragsdatum" = CURRENT_DATE AND ("Stage" = 'Abgeschlossen' OR "Stage"='Abgeschlossen, gewonnen')
    GROUP BY "Art der Maßnahme", "Owner Name", "Auftragsdatum"
   ),
 closings_week AS (
@@ -22,7 +22,7 @@ closings_week AS (
     ROUND(SUM("Betrag 1"::numeric) + SUM("Betrag 2"::numeric))::int as betrag_diese_woche,
     SUM(SUM("Betrag 1"::numeric) + SUM("Betrag 2"::numeric)) OVER(PARTITION BY "Owner Name") as betrag_woche_summe_besitzer
     FROM zoho."Deals"
-   WHERE  "Stage" = 'Abgeschlossen' AND date_trunc('week', "Auftragsdatum"::date) = date_trunc('week', CURRENT_DATE) -- diese Woche
+   WHERE  ("Stage" = 'Abgeschlossen' OR "Stage"='Abgeschlossen, gewonnen') AND date_trunc('week', "Auftragsdatum"::date) = date_trunc('week', CURRENT_DATE) -- diese Woche
    GROUP BY "Art der Maßnahme", "Owner Name"
   ),
 closings_month AS (   
@@ -33,7 +33,7 @@ closings_month AS (
     ROUND(SUM("Betrag 1"::numeric) + SUM("Betrag 2"::numeric))::int as betrag_diesen_monat,
     SUM(SUM("Betrag 1"::numeric) + SUM("Betrag 2"::numeric)) OVER(PARTITION BY "Owner Name") as betrag_monat_summe_besitzer
     FROM zoho."Deals"
-   WHERE  "Stage" = 'Abgeschlossen' AND date_trunc('month', "Auftragsdatum"::date) = date_trunc('month', CURRENT_DATE) -- diesen Monat
+   WHERE  ("Stage" = 'Abgeschlossen' OR "Stage"='Abgeschlossen, gewonnen') AND date_trunc('month', "Auftragsdatum"::date) = date_trunc('month', CURRENT_DATE) -- diesen Monat
    GROUP BY "Art der Maßnahme", "Owner Name"
 ),
 sales_images AS (
