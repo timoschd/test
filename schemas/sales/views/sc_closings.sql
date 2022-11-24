@@ -1,5 +1,5 @@
 -- delte view
-DROP VIEW IF EXISTS sc.closings CASCADE;
+DROP VIEW IF EXISTS sc.closings;
 
 -- create table 
 CREATE VIEW sc.closings AS (

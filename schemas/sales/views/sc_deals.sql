@@ -1,5 +1,5 @@
 -- delete view
-DROP VIEW IF EXISTS sc.deals CASCADE;
+DROP VIEW IF EXISTS sc.deals;
 
 -- create view
 CREATE VIEW sc.deals AS (

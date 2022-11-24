@@ -1,5 +1,5 @@
 -- delete view
-DROP VIEW IF EXISTS sc.leads CASCADE;
+DROP VIEW IF EXISTS sc.leads;
 
 -- create view
 CREATE VIEW sc.leads AS (
@@ -22,6 +22,6 @@ CREATE VIEW sc.leads AS (
 		to_char("Created Time"::date, 'IYYY-IW') as woche,
 		to_char("Created Time"::date, 'IYYY-MM') as monat
 	FROM zoho."Leads");
-	
+
 -- set owner 
 ALTER TABLE sc.leads OWNER TO read_only;
