@@ -8,7 +8,7 @@ CREATE VIEW sc.deals AS (
 		NULL::text as lead_status,
 		"Stage"::text as deal_stufe,
 		"Probability (%)"::integer as deal_stage,
-		"Aufnahme Datum"::date as datum,
+		COALESCE("Aufnahme Datum"::date, "Created Time"::date) as datum,
 		CASE
 			WHEN ("Art der Maßnahme"::text NOT IN ('Weiterbildung', 'Umschulung', 'AVGS') OR "Art der Maßnahme"::text IS NULL)
 			AND "Aufnahme Datum"::date < '2022-10-01'
