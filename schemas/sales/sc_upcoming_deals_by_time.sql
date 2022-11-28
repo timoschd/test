@@ -10,3 +10,8 @@ AND "Deals"."Probability (%)" <= 85;
 
 --set owner
 ALTER TABLE sc.upcoming_deals_by_time OWNER TO read_only;
+
+-- set PK
+ALTER TABLE sc.upcoming_deals_by_time
+    ADD PRIMARY KEY (date_time);
+    
