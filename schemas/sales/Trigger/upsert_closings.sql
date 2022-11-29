@@ -38,7 +38,8 @@ RETURNS TRIGGER AS
 		"Modified Time" as last_event_on
 	FROM zoho."Deals"
 	WHERE "Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen')
-     
+    AND "Id" NOT IN (SELECT Id FROM sc.closings) 
+
     ON CONFLICT ("Id")
     DO NOTHING;
 

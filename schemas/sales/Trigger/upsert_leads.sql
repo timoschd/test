@@ -30,7 +30,8 @@ RETURNS TRIGGER AS
     		to_char("Created Time"::date, 'IYYY-MM') as monat,
 			"Modified Time" as last_event_on
     	FROM zoho."Leads"
-    
+		WHERE "Id" NOT IN (SELECT Id FROM sc.leads)
+
     ON CONFLICT ("Id")
     DO NOTHING;
 

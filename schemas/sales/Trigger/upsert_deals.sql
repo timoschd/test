@@ -44,6 +44,7 @@ RETURNS TRIGGER AS
 		to_Char(COALESCE("Aufnahme Datum"::date, "Created Time"::date), 'IYYY-MM') as monat,
     	"Modified Time" as last_event_on
 	FROM zoho."Deals"
+	WHERE "Id" NOT IN (SELECT Id FROM sc.deals)
      
     ON CONFLICT ("Id")
     DO NOTHING;
