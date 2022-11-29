@@ -39,3 +39,6 @@ ALTER TABLE sc.closings_test OWNER TO read_only;
 -- PK
 ALTER TABLE sc.closings_test
     ADD PRIMARY KEY ("Id");
+
+
+CREATE INDEX ON sc.closings_test (last_event_on); 

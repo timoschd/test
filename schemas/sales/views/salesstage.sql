@@ -1,8 +1,8 @@
 --drop view 
-DROP VIEW IF EXISTS sc.closings_by_berater_and_time;
+DROP VIEW IF EXISTS sc.salesstage;
 
 -- Create view
-CREATE VIEW sc.closings_by_berater_and_time AS
+CREATE VIEW sc.salesstage AS
 -- closings per berater today
 with today AS (
 SELECT 	"Owner Name"::text as berater,
@@ -86,5 +86,6 @@ FROM berater
 	LEFT JOIN stage ON berater.berater = stage.berater
 	LEFT JOIN stage_closing ON berater.berater = stage_closing.berater
 	LEFT JOIN images ON berater.berater = images.berater;
+	
 -- set owner
-ALTER TABLE sc.closings_by_berater_and_time OWNER to read_only;
+ALTER TABLE sc.salesstage OWNER to read_only;

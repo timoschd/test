@@ -4,6 +4,9 @@ RETURNS TRIGGER AS
     $BODY$
     BEGIN
 	-- insert new deal value by time 
+    DELETE FROM sc.upcoming_deals_by_time
+    WHERE date_time::date = CURRENT_DATE; 
+    
     INSERT INTO sc.upcoming_deals_by_time
         SELECT 	SUM("Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric) betrag,
 				NOW()::timestamp as date_time

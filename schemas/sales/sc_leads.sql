@@ -30,3 +30,6 @@ ALTER TABLE sc.leads_test OWNER TO read_only;
 -- PK
 ALTER TABLE sc.leads_test
     ADD PRIMARY KEY ("Id");
+
+
+CREATE INDEX ON sc.leads_test (last_event_on); 

@@ -40,3 +40,6 @@ CREATE TABLE sc.deals_test AS (
 
 -- set owner
 ALTER TABLE sc.deals_test OWNER TO read_only;
+
+
+CREATE INDEX ON sc.deals_test (last_event_on); 
