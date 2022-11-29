@@ -38,10 +38,9 @@ closings_month AS (
 ),
 sales_images AS (
   SELECT 
-  "Full Name" as name_emp,
-  headshot_image_url
-  FROM zoho."Users"
-  WHERE headshot_image_url IS NOT NULL
+  berater as name_emp,
+  url as headshot_image_url
+  FROM sc.images
  )
 
 
