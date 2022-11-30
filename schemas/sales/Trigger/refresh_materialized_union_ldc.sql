@@ -5,7 +5,7 @@ RETURNS TRIGGER AS
     BEGIN
 
 	-- refresh union_ldc
-    REFRESH MATERIALIZED VIEW sc.union_ldc;
+    REFRESH MATERIALIZED VIEW sc.union_ldc_materialized;
 
 	RETURN NULL;
     END;
