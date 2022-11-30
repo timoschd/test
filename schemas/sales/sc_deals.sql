@@ -41,5 +41,8 @@ CREATE TABLE sc.deals AS (
 -- set owner
 ALTER TABLE sc.deals OWNER TO read_only;
 
+-- PK
+ALTER TABLE sc.deals
+    ADD PRIMARY KEY ("Id");
 
 CREATE INDEX ON sc.deals (last_event_on); 
