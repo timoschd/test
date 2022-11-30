@@ -1,7 +1,7 @@
 DROP VIEW IF EXISTS sc.union_ldc;
 
 -- UNION leads, deals, closings
-CREATE VIEW sc.union_ldc AS (
+CREATE MATERIALIZED VIEW sc.union_ldc AS (
 SELECT * FROM sc.leads
 	UNION
 SELECT * FROM sc.deals

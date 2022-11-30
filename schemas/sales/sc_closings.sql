@@ -1,8 +1,8 @@
 -- delte table
-DROP TABLE IF EXISTS sc.closings_test;
+DROP TABLE IF EXISTS sc.closings;
 
 -- create table 
-CREATE TABLE sc.closings_test AS (
+CREATE TABLE sc.closings AS (
 	SELECT 
 		"Id"::bigint,
 		NULL::text as lead_status,
@@ -33,12 +33,12 @@ CREATE TABLE sc.closings_test AS (
 	WHERE "Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen'));
     
 -- set owner
-ALTER TABLE sc.closings_test OWNER TO read_only;
+ALTER TABLE sc.closings OWNER TO read_only;
 
 
 -- PK
-ALTER TABLE sc.closings_test
+ALTER TABLE sc.closings
     ADD PRIMARY KEY ("Id");
 
 
-CREATE INDEX ON sc.closings_test (last_event_on); 
+CREATE INDEX ON sc.closings (last_event_on); 

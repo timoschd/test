@@ -1,8 +1,8 @@
 -- delete view
-DROP TABLE IF EXISTS sc.deals_test;
+DROP TABLE IF EXISTS sc.deals;
 
 -- create view
-CREATE TABLE sc.deals_test AS (
+CREATE TABLE sc.deals AS (
 	SELECT 
 		"Id"::bigint,
 		NULL::text as lead_status,
@@ -39,7 +39,7 @@ CREATE TABLE sc.deals_test AS (
 	FROM zoho."Deals");
 
 -- set owner
-ALTER TABLE sc.deals_test OWNER TO read_only;
+ALTER TABLE sc.deals OWNER TO read_only;
 
 
-CREATE INDEX ON sc.deals_test (last_event_on); 
+CREATE INDEX ON sc.deals (last_event_on); 

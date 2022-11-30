@@ -5,11 +5,11 @@ RETURNS TRIGGER AS
     BEGIN
 
 	-- delete old entries
-    DELETE FROM sc.deals_test
-	WHERE "Id" IN (SELECT "Id" FROM zoho."Deals" WHERE "Modified Time" > (SELECT max(last_event_on) FROM sc.deals_test)); 
+    DELETE FROM sc.deals
+	WHERE "Id" IN (SELECT "Id" FROM zoho."Deals" WHERE "Modified Time" > (SELECT max(last_event_on) FROM sc.deals)); 
 
 	-- insert new deals 
-    INSERT INTO sc.deals_test
+    INSERT INTO sc.deals
         SELECT 
 		"Id"::bigint,
 		NULL::text as lead_status,
@@ -44,7 +44,7 @@ RETURNS TRIGGER AS
 		to_Char(COALESCE("Aufnahme Datum"::date, "Created Time"::date), 'IYYY-MM') as monat,
     	"Modified Time" as last_event_on
 	FROM zoho."Deals"
-	WHERE "Id" NOT IN (SELECT Id FROM sc.deals)
+	WHERE "Id" NOT IN (SELECT "Id" FROM sc.deals)
      
     ON CONFLICT ("Id")
     DO NOTHING;

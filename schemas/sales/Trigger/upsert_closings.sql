@@ -5,11 +5,11 @@ RETURNS TRIGGER AS
     BEGIN
 
 	-- delete old entries
-    DELETE FROM sc.closings_test
-	WHERE "Id" IN (SELECT "Id" FROM zoho."Deals" WHERE "Modified Time" > (SELECT max(last_event_on) FROM sc.closings_test)); 
+    DELETE FROM sc.closings
+	WHERE "Id" IN (SELECT "Id" FROM zoho."Deals" WHERE "Modified Time" > (SELECT max(last_event_on) FROM sc.closings)); 
 
 	-- insert new closings 
-    INSERT INTO sc.closings_test
+    INSERT INTO sc.closings
         SELECT 
 		"Id"::bigint,
 		NULL::text as lead_status,
@@ -38,7 +38,7 @@ RETURNS TRIGGER AS
 		"Modified Time" as last_event_on
 	FROM zoho."Deals"
 	WHERE "Stage"::text IN ('Abgeschlossen', 'Abgeschlossen, gewonnen')
-    AND "Id" NOT IN (SELECT Id FROM sc.closings) 
+    AND "Id" NOT IN (SELECT "Id" FROM sc.closings) 
 
     ON CONFLICT ("Id")
     DO NOTHING;
