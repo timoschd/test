@@ -101,4 +101,4 @@ SELECT * FROM closings
 
 
 -- set owner 
-ALTER View sc.union_ldc OWNER TO read_only;
+ALTER VIEW sc.union_ldc OWNER TO read_only;

@@ -44,4 +44,4 @@ FROM split_wert
 GROUP BY berater, datum;
 
 -- set owner
-ALTER TABLE sc.closings_by_day_and_berater OWNER to read_only;
+ALTER VIEW sc.closings_by_day_and_berater OWNER to read_only;

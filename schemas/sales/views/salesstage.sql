@@ -61,7 +61,7 @@ SELECT 	"Deals"."Owner Name"::text as berater
 	FROM zoho."Deals"
 	GROUP BY berater
 	HAVING "Deals"."Owner Name"::text NOT IN ('Steffen Deutsch', 'Lars Petersen', 'Peter Langheinrich', 'Romy Kopsch', 'karriere tutor', 
-                                              'Kiriaki Orfanidis Corral', 'Test Account', 'Melanie Schnitzler')
+                                                'Kiriaki Orfanidis Corral', 'Test Account', 'Melanie Schnitzler')
 	),
 images as (
 SELECT 	berater,
@@ -86,6 +86,6 @@ FROM berater
 	LEFT JOIN stage ON berater.berater = stage.berater
 	LEFT JOIN stage_closing ON berater.berater = stage_closing.berater
 	LEFT JOIN images ON berater.berater = images.berater;
-	
+
 -- set owner
-ALTER TABLE sc.salesstage OWNER to read_only;
+ALTER VIEW sc.salesstage OWNER to read_only;

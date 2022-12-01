@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS sc.current_closings;
+DROP MATERIALIZED VIEW IF EXISTS sc.materialized_current_closings;
 
 -- get closings and deal revenue per current day, week, month and dealowner and join image url to dealowner headshot  
-CREATE VIEW sc.current_closings AS (  
+CREATE MATERIALIZED VIEW sc.materialized_current_closings AS (  
 with closings_day AS (
   SELECT
     COUNT(DISTINCT "Id"::text) AS deals_heute,
@@ -65,5 +65,9 @@ LEFT JOIN sales_images
     ON closings_month.deal_besitzer = sales_images.name_emp OR  closings_week.deal_besitzer = sales_images.name_emp
 );
 
+-- make unique index
+Create UNIQUE INDEX ON sc.materialized_current_closings (deal_besitzer, massnahme_art);
+
+
 -- SET OWNER
-ALTER TABLE sc.current_closings OWNER TO read_only;
+ALTER MATERIALIZED VIEW sc.materialized_current_closings OWNER TO read_only;
