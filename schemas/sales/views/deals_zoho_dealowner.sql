@@ -44,8 +44,8 @@ sales_images AS (
  )
 
 
-SELECT closings_month.deal_besitzer,
-  closings_month.massnahme_art, 
+SELECT COALESCE(closings_month.deal_besitzer, closings_week.deal_besitzer) as deal_besitzer,
+  COALESCE(closings_month.massnahme_art, closings_week.massnahme_art) as massnahme_art,
   COALESCE(deals_diesen_monat,0) as deals_diesen_monat,
   COALESCE(betrag_diesen_monat,0) as betrag_diesen_monat, 
   COALESCE(deals_diese_woche,0) as deals_diese_woche, 
@@ -57,12 +57,12 @@ SELECT closings_month.deal_besitzer,
   DENSE_RANK() OVER(ORDER BY COALESCE(betrag_monat_summe_besitzer,0) DESC) as rank_monat, 
   sales_images.headshot_image_url 
 FROM closings_month
-LEFT JOIN closings_week
+FULL JOIN closings_week
     ON closings_month.deal_besitzer = closings_week.deal_besitzer AND closings_month.massnahme_art =  closings_week.massnahme_art
 LEFT JOIN closings_day
     ON closings_month.deal_besitzer = closings_day.deal_besitzer AND closings_month.massnahme_art =  closings_day.massnahme_art
 LEFT JOIN sales_images
-    ON closings_month.deal_besitzer = sales_images.name_emp
+    ON closings_month.deal_besitzer = sales_images.name_emp OR  closings_week.deal_besitzer = sales_images.name_emp
 );
 
 -- SET OWNER

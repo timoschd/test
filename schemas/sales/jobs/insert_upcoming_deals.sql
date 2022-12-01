@@ -4,7 +4,8 @@ SELECT cron.schedule('insert_upcoming_deals_daily', -- name
                     'INSERT INTO sc.upcoming_deals_by_time
                         SELECT
                         SUM("Deals"."Betrag 1"::numeric + "Deals"."Betrag 2"::numeric) betrag,
-				        NOW()::timestamp as date_time
+				        NOW()::timestamp as date_time,
+                        CURRENT_DATE as datum
 			            FROM zoho."Deals" 
 			            WHERE "Deals"."Probability (%)" >= 50
 			                AND "Deals"."Probability (%)" <= 85
