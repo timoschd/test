@@ -24,7 +24,7 @@ SELECT
  date_trunc('month', "Auftragsdatum")::date as Monat,
  art,
  count("Id") as anzahl_closings,
- SUM(closing_value) as closing_value,
+ ROUND(SUM(closing_value)) as closing_value,
  "Stage"
 FROM temptbl
 GROUP BY date_trunc('month', "Auftragsdatum"::date), "Stage", art
