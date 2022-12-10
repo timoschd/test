@@ -43,6 +43,6 @@ jobs:
           done
 
       - name: Set up Cloudsql proxy to DWH
-        if: any_changed
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           echo 'Changed files detected, starting cloudsql proxy.'
