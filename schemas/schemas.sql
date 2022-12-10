@@ -12,7 +12,7 @@ CREATE SCHEMA kc;
 ALTER SCHEMA kc OWNER TO read_only;
 
 
-CREATE SCHEMA tc;
+CREATE SCHEMA tx;
 
 
 ALTER SCHEMA tc OWNER TO read_only;

@@ -12,7 +12,7 @@ SELECT
 			AND "Auftragsdatum"::date < '2022-10-01'
 			AND "Betrag 1"::numeric < 33000 THEN 'Weiterbildung'
 			ELSE "Art der Maßnahme"::text END
-	as art,
+	as art_x,
 	"Betrag 1"::numeric + "Betrag 2"::numeric as closing_value,
 	"Stage"
 	FROM zoho."Deals"
