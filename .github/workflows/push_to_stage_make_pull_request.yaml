@@ -14,11 +14,18 @@ jobs:
       - name:  Check out files
         uses:  actions/checkout@v3
 
-      - name: Create a Pull Request
-        uses: repo-sync/pull-request@v2
+      # - name: Create a Pull Request
+      #   uses: repo-sync/pull-request@v2
+      #   with:
+      #     destination_branch: "master"
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     #pr_label: "feature, automated pr"
+      #     pr_title: ${{ github.event.commits[0].message }}
+      #     pr_assignee: ${{ github.actor }}
+
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
         with:
-          destination_branch: "master"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          #pr_label: "feature, automated pr"
-          pr_title: ${{ github.event.commits[0].message }}
-          pr_assignee: ${{ github.actor }}
+          files: |
+            schemas/**.sql
