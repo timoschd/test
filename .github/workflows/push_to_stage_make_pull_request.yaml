@@ -26,9 +26,9 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v34
-        # with:
-        #   files: |
-        #     schemas/**.sql
+        with:
+          files: |
+            schemas/**/*.sql
 
       - name: List all added files
         run: |
