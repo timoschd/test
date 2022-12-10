@@ -30,7 +30,7 @@ SELECT app_item_id,
  	cast(aktion AS JSON) ->> 'text' AS anfrage_status,
  	cast(unqualifiziert_detail AS JSON) ->> 'text' AS unqualifiziert_detail,
  	cast(art_der_anfrage AS JSON) ->> 'text' AS herkunft,
- 	cast(account_art AS JSON) ->> 'text' AS account_art_x,
+ 	cast(account_art AS JSON) ->> 'text' AS account_art,
  	email,
  	calculation_2 AS telefon,
  	last_event_on

@@ -41,3 +41,8 @@ jobs:
           for file in ${{ steps.changed-files-specific.outputs.modified_files }}; do
             echo "$file was modified"
           done
+
+      - name: Set up Cloudsql proxy to DWH
+        if: any_changed
+        run: |
+          echo 'Changed files detected, starting cloudsql proxy.'
