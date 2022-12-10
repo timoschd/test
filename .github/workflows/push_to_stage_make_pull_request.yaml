@@ -29,3 +29,8 @@ jobs:
         with:
           files: |
             schemas/**.sql
+
+      - name: print changed files
+        run: |
+          cat ${GITHUB_ACTION_PATH}/get-changed-paths.sh
+        shell: bash
